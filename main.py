@@ -107,7 +107,7 @@ def game_over_screen(screen, coins_collected):
         screen.blit(back_to_start_text, (back_button_x + 10, back_button_y))
         pygame.display.flip()
         clock.tick(30)
-def upgrade_window(screen, player_coins):
+def upgrade_window(screen, experience):
     upgrade_font = pygame.font.Font("pixelletters.ttf", 36)
 
     upgrade_text = upgrade_font.render('Choose an Upgrade', True, WHITE)
@@ -144,16 +144,16 @@ def upgrade_window(screen, player_coins):
         pygame.display.flip()
         clock.tick(30)
 
-def move_coins_towards_player(coins, player, move_speed=4, attraction_radius=150):
-    for coin in coins:
-        dx, dy = player.x - coin.x, player.y - coin.y
+def move_items_towards_player(items, player, move_speed=4, attraction_radius=150):
+    for item in items:
+        dx, dy = player.x - item.x, player.y - item.y
         distance = math.sqrt(dx**2 + dy**2)
         if distance < attraction_radius:
             # Normalize the direction
             dx, dy = dx / distance, dy / distance
-            # Move the coin towards the player
-            coin.x += dx * move_speed
-            coin.y += dy * move_speed
+            # Move the item towards the player
+            item.x += dx * move_speed
+            item.y += dy * move_speed
 
 class Player:
     def __init__(self, x, y):
@@ -244,7 +244,9 @@ class Enemy:
     def take_damage(self, coins):
         self.health -= 1
         if self.health <= 0:
-            coins.append(Coin(self.x, self.y))
+            for _ in range(self.vertices):
+                coins.append(Coin(self.x, self.y))
+                experience_points.append(Experience(self.x, self.y))
             return True
         return False
 
@@ -267,13 +269,6 @@ class TriangleEnemy(Enemy):
             points.append((x, y))
         pygame.draw.polygon(screen, self.color, points)
 
-    def take_damage(self, coins):
-        self.health -= 1
-        if self.health <= 0:
-            for _ in range(self.vertices):
-                coins.append(Coin(self.x, self.y))
-            return True
-        return False
 
 
 class SquareEnemy(Enemy):
@@ -288,13 +283,6 @@ class SquareEnemy(Enemy):
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
 
-    def take_damage(self, coins):
-        self.health -= 1
-        if self.health <= 0:
-            for _ in range(self.vertices):
-                coins.append(Coin(self.x, self.y))
-            return True
-        return False
 
 class PentagonEnemy(Enemy):
     def __init__(self):
@@ -315,13 +303,6 @@ class PentagonEnemy(Enemy):
             points.append((x, y))
         pygame.draw.polygon(screen, self.color, points)
 
-    def take_damage(self, coins):
-        self.health -= 1
-        if self.health <= 0:
-            for _ in range(self.vertices):
-                coins.append(Coin(self.x, self.y))
-            return True
-        return False
 
 class HexagonEnemy(Enemy):
     def __init__(self):
@@ -342,13 +323,6 @@ class HexagonEnemy(Enemy):
             points.append((x, y))
         pygame.draw.polygon(screen, self.color, points)
 
-    def take_damage(self, coins):
-        self.health -= 1
-        if self.health <= 0:
-            for _ in range(self.vertices):
-                coins.append(Coin(self.x, self.y))
-            return True
-        return False
 
 
 class Projectile:
@@ -372,15 +346,23 @@ class Projectile:
         return (self.x < other.x + other.size and self.x + self.size > other.x and
                 self.y < other.y + other.size and self.y + self.size > other.y)
 
-class Coin:
-    def __init__(self, x, y):
+class Item:
+    def __init__(self, x, y, size, color):
         self.x = x
         self.y = y
-        self.size = 10
-        self.color = (255, 215, 0)  # Gold color
+        self.size = size
+        self.color = color
 
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)
+
+class Coin(Item):
+    def __init__(self, x, y):
+        super().__init__(x, y, 10, (255, 215, 0))  # Gold color
+
+class Experience(Item):
+    def __init__(self, x, y):
+        super().__init__(x, y, 8, (0, 255, 0))  # Green color
 
 class Tiles(pygame.sprite.Sprite):
     def __init__(self):
@@ -407,6 +389,8 @@ enemies = []
 projectiles = []
 player_coins = 0
 coins = []
+player_experience = 0
+experience_points = []
 tiles = Tiles()
 
 start_screen(screen)
@@ -459,22 +443,34 @@ while running:
     # Update and draw player
     player.draw(screen)
 
-    move_coins_towards_player(coins, player)
+    move_items_towards_player(coins + experience_points, player)
+
+    # Handle coins
     for coin in coins[:]:
         coin.draw(screen)
         if player.collides_with(coin):
             coins.remove(coin)
             player_coins += 1
 
-    if player_coins >= 20:
-        player_coins -= 20  # Deduct coins after upgrading
-        upgrade_window(screen, player_coins)
+    # Handle experience points
+    for exp in experience_points[:]:
+        exp.draw(screen)
+        if player.collides_with(exp):
+            experience_points.remove(exp)
+            # Handle experience gain here, for example:
+            player_experience += 1
+
+    if player_experience >= 20:
+        player_experience -= 20  # Deduct exp after upgrading
+        upgrade_window(screen, player_experience)
         # Display coin count
     coin_text = font.render(f"Coins: {player_coins}", True, WHITE)
     screen.blit(coin_text, (10, 10))
+    exp_text = font.render(f"Experience: {player_experience}", True, WHITE)
+    screen.blit(exp_text, (10, 40))
     # Display player's health
     health_text = font.render(f"Health: {player.health}", True, WHITE)
-    screen.blit(health_text, (10, 40))  # Position below the coin count
+    screen.blit(health_text, (10, 70))  # Position below the coin count
 
 
     # Update and draw enemies
@@ -515,6 +511,8 @@ while running:
                 projectiles = []
                 player_coins = 0
                 coins = []
+                player_experience
+                experience_points = []
                 enemy_spawn_time = 0
                 spawn_count = 2
                 running = True
