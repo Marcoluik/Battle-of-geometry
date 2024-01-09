@@ -23,6 +23,33 @@ font = pygame.font.Font("pixelletters.ttf",36)
 # Game loop flag
 running = True
 
+
+def start_screen(screen):
+    title_font = pygame.font.Font("pixelletters.ttf", 72)
+    start_font = pygame.font.Font("pixelletters.ttf", 36)
+    guide_font = pygame.font.Font("pixelletters.ttf", 30)
+
+    title_text = title_font.render('Battle of Geometry', True, WHITE)
+    start_text = start_font.render('Press Any Key to Start', True, WHITE)
+    guide_text = guide_font.render('WASD to move, shoot with left click, aim with mouse, dash on space', True, WHITE)
+
+
+
+    screen.fill(BLACK)
+    screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, HEIGHT // 2 - 100))
+    screen.blit(start_text, (WIDTH // 2 - start_text.get_width() // 2, HEIGHT // 2 + 50))
+    screen.blit(guide_text, (WIDTH // 2 - guide_text.get_width() // 2, HEIGHT // 2 + 150))
+    pygame.display.flip()
+
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                waiting = False
+
 def generate_safe_spawn(player, min_distance=100):
     while True:
         x = random.randint(0, WIDTH)
@@ -35,17 +62,22 @@ def game_over_screen(screen, coins_collected):
     game_over_font = pygame.font.Font("pixelletters.ttf",72)
     coins_font = pygame.font.Font("pixelletters.ttf",50)
     try_again_font = pygame.font.Font("pixelletters.ttf",50)
-    button_font = pygame.font.Font("pixelletters.ttf",40)
+    back_to_start_font = pygame.font.Font("pixelletters.ttf", 40)
 
     game_over_text = game_over_font.render('Game Over', True, WHITE)
     coins_text = coins_font.render(f'You earned {coins_collected} coins', True, WHITE)
     try_again_text = try_again_font.render('Try Again', True, BLACK)
+    back_to_start_text = back_to_start_font.render('Back to Start', True, BLACK)
 
     # Button dimensions
     button_x = WIDTH // 2 - 100
     button_y = HEIGHT // 2 + 50
     button_width = 200
     button_height = 50
+
+    back_button_x = WIDTH // 2 - 100
+    back_button_y = HEIGHT // 2 + 120
+
 
     waiting_for_input = True
     while waiting_for_input:
@@ -58,12 +90,21 @@ def game_over_screen(screen, coins_collected):
                 if (button_x <= mouse_x <= button_x + button_width and
                         button_y <= mouse_y <= button_y + button_height):
                     waiting_for_input = False
+                if (back_button_x <= mouse_x <= back_button_x + button_width and
+                        back_button_y <= mouse_y <= back_button_y + button_height):
+                    # Reset game state as needed
+                    # (e.g., reset player position, health, coins, etc.)
+                    start_screen(screen)
+                    waiting_for_input = False
+
 
         screen.fill(BLACK)
         screen.blit(game_over_text, (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - 100))
         screen.blit(coins_text, (WIDTH // 2 - coins_text.get_width() // 2, HEIGHT // 2 - 30))
         pygame.draw.rect(screen, WHITE, (button_x, button_y, button_width, button_height))
         screen.blit(try_again_text, (button_x + 10, button_y))
+        pygame.draw.rect(screen, WHITE, (back_button_x, back_button_y, button_width, button_height))
+        screen.blit(back_to_start_text, (back_button_x + 10, back_button_y))
         pygame.display.flip()
         clock.tick(30)
 def upgrade_window(screen, player_coins):
@@ -103,6 +144,17 @@ def upgrade_window(screen, player_coins):
         pygame.display.flip()
         clock.tick(30)
 
+def move_coins_towards_player(coins, player, move_speed=4, attraction_radius=150):
+    for coin in coins:
+        dx, dy = player.x - coin.x, player.y - coin.y
+        distance = math.sqrt(dx**2 + dy**2)
+        if distance < attraction_radius:
+            # Normalize the direction
+            dx, dy = dx / distance, dy / distance
+            # Move the coin towards the player
+            coin.x += dx * move_speed
+            coin.y += dy * move_speed
+
 class Player:
     def __init__(self, x, y):
         self.x = x
@@ -111,6 +163,9 @@ class Player:
         self.color = WHITE
         self.speed = 5
         self.health = 3
+        self.dash_speed = 40  # Speed of dash
+        self.dash_cooldown = 500  # Cooldown in milliseconds
+        self.last_dash = 0  # Time since last dash
 
     def draw(self, screen):
         center_x = self.x + self.size // 2
@@ -138,6 +193,13 @@ class Player:
 
         # Check if the distance is less than the sum of the radii
         return distance < (self.size // 2 + other.size // 2)
+
+    def dash(self, current_time):
+        if current_time - self.last_dash > self.dash_cooldown:
+            self.last_dash = current_time
+            # Dash mechanics (e.g., increase speed or teleport forward)
+            # Example: Increase speed for a single frame
+            self.speed += self.dash_speed
 
 class Enemy:
     def __init__(self):
@@ -193,6 +255,7 @@ class TriangleEnemy(Enemy):
         self.color = (255, 0, 0)  # Red color
         self.health = 3  # Health value for TriangleEnemy
         self.size = 10
+        self.speed = 4
 
     def draw(self, screen):
         radius = self.size
@@ -220,6 +283,7 @@ class SquareEnemy(Enemy):
         self.color = (0, 255, 0)  # Green color
         self.health = 4  # Health value for SquareEnemy
         self.size = 15
+        self.speed = 3
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
@@ -239,6 +303,7 @@ class PentagonEnemy(Enemy):
         self.color = (0, 0, 255)  # Blue color
         self.health = 5  # Health value for PentagonEnemy
         self.size = 20
+        self.speed = 2
 
     def draw(self, screen):
         radius = self.size
@@ -265,6 +330,7 @@ class HexagonEnemy(Enemy):
         self.color = (255, 255, 0)  # Yellow color
         self.health = 6  # Health value for HexagonEnemy
         self.size = 30
+        self.speed = 1
 
     def draw(self, screen):
         radius = self.size
@@ -343,6 +409,8 @@ player_coins = 0
 coins = []
 tiles = Tiles()
 
+start_screen(screen)
+
 while running:
     screen.fill(BLACK)
 
@@ -371,8 +439,12 @@ while running:
         # Increase the spawn count following the power of 1.5 rule
         spawn_count = int(spawn_count ** 1.5)
 
+    current_time = pygame.time.get_ticks()
+
     # Player movement
     keys = pygame.key.get_pressed()
+    if keys[pygame.K_SPACE]:
+        player.dash(current_time)
     if keys[pygame.K_a]:
         player.move(-1, 0)
     if keys[pygame.K_d]:
@@ -383,9 +455,11 @@ while running:
         player.move(0, 1)
 
 
+    player.speed = 5
     # Update and draw player
     player.draw(screen)
 
+    move_coins_towards_player(coins, player)
     for coin in coins[:]:
         coin.draw(screen)
         if player.collides_with(coin):
