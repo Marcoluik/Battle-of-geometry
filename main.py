@@ -5,12 +5,12 @@ import math
 pygame.init()
 
 # Set up the display
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1680, 920
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Battle of geometry")
 enemy_spawn_time = 2  # Timer for enemy spawning
-spawn_interval = 3000  # 10 seconds in milliseconds
-spawn_count = 2  # Initial number of enemies to spawn
+spawn_interval = 5000  # 10 seconds in milliseconds
+spawn_count = 3  # Initial number of enemies to spawn
 # Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -129,20 +129,37 @@ def upgrade_window(screen, experience):
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                for button in buttons:
+                for index, button in enumerate(buttons):
                     bx, by, bw, bh, _ = button
                     if bx <= mouse_x <= bx + bw and by <= mouse_y <= by + bh:
+                        # Handle each button click separately
+                        if index == 0:
+                            # Handle 'Bullet spread' button
+                            print("Bullet size selected")
+                            projectile.size += 1
+                        elif index == 1:
+                            # Handle 'Health boost' button
+                            print("Health boost selected")
+                            player.health += 1
+                        elif index == 2:
+                            # Handle 'Attack damage' button
+                            print("Attack damage selected")
+                            player.attackdmg += 1
+
                         upgrade_selected = True
                         break
+        screen.fill(BLACK)  # Clear the screen with a background color
 
-        screen.fill(BLACK)
+        # Draw the header text
         screen.blit(upgrade_text, (WIDTH // 2 - upgrade_text.get_width() // 2, HEIGHT // 2 - 150))
+
         for bx, by, bw, bh, text in buttons:
             pygame.draw.rect(screen, WHITE, (bx, by, bw, bh))
             button_text = upgrade_font.render(text, True, BLACK)
             screen.blit(button_text, (bx + 10, by))
-        pygame.display.flip()
-        clock.tick(30)
+
+        pygame.display.flip()  # Update the screen
+        clock.tick(30)  # Control the frame rate
 
 def move_items_towards_player(items, player, move_speed=4, attraction_radius=150):
     for item in items:
@@ -160,14 +177,28 @@ class Player:
         self.x = x
         self.y = y
         self.size = 20
-        self.color = WHITE
+        self.color = (255, 255, 255)  # Assuming white color
         self.speed = 5
         self.health = 3
-        self.dash_speed = 40  # Speed of dash
+        self.dash_speed = 15  # Adjusted for multi-frame dash
+        self.dash_duration = 10  # Dash duration in frames
         self.dash_cooldown = 500  # Cooldown in milliseconds
         self.last_dash = 0  # Time since last dash
+        self.is_dashing = False
+        self.dash_trail = []  # Store positions for the dash trail
+        self.dash_frames_remaining = 0
+        self.speed_reduction_per_frame = 0
+        self.attackdmg = 1
 
     def draw(self, screen):
+        # Draw the dash trail
+        for pos, alpha in self.dash_trail:
+            trail_color = (*self.color[:3], alpha)
+            trail_surface = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
+            pygame.draw.circle(trail_surface, trail_color, (self.size // 2, self.size // 2), self.size // 2.3)
+            screen.blit(trail_surface, pos)
+
+        # Draw the player
         center_x = self.x + self.size // 2
         center_y = self.y + self.size // 2
         pygame.draw.circle(screen, self.color, (center_x, center_y), self.size // 2)
@@ -194,12 +225,60 @@ class Player:
         # Check if the distance is less than the sum of the radii
         return distance < (self.size // 2 + other.size // 2)
 
+    def update(self, current_time):
+        if self.dash_frames_remaining > 0:
+            # Reduce the speed
+            self.speed -= self.speed_reduction_per_frame
+
+            # Ensure the speed does not go below normal
+            self.speed = max(self.speed, 5)
+
+            # Decrement the counter
+            self.dash_frames_remaining -= 1
+
+            # Add current position to the dash trail
+            self.dash_trail.append(((self.x, self.y), 255))
+        else:
+            # If dashing is over, start fading the trail
+            self.fade_dash_trail()
+
+        if current_time - self.last_dash > self.dash_cooldown and self.is_dashing:
+            self.is_dashing = False
+            self.speed = 5  # Resetting the speed to normal after dash ends
+
     def dash(self, current_time):
-        if current_time - self.last_dash > self.dash_cooldown:
+        if current_time - self.last_dash > self.dash_cooldown and not self.is_dashing:
             self.last_dash = current_time
-            # Dash mechanics (e.g., increase speed or teleport forward)
-            # Example: Increase speed for a single frame
+            self.is_dashing = True  # Start dashing
+            # Reset dash trail for new dash
+            self.dash_trail.clear()
+            # Add initial position to the dash trail with full opacity
+            self.dash_trail.append(((self.x, self.y), 255))
+            # Increase speed for the dash
             self.speed += self.dash_speed
+            # Schedule to reset the speed and start fading the trail
+            self.schedule_speed_reset()
+
+    def schedule_speed_reset(self):
+        # Define the duration of the dash effect in terms of frames or time
+        dash_duration_frames = 8  # for example, 1 second at 60 FPS
+
+        # Calculate the amount of speed reduction per frame
+        speed_reduction_per_frame = (self.speed - 5) / dash_duration_frames
+
+        # Store these values for use in the update method
+        self.dash_frames_remaining = dash_duration_frames
+        self.speed_reduction_per_frame = speed_reduction_per_frame
+
+    def fade_dash_trail(self):
+        # Fade out the dash trail
+        new_trail = []
+        alpha_decrement = max(1, 255 // self.dash_duration)  # Ensure at least 1 alpha decrement
+        for pos, alpha in self.dash_trail:
+            new_alpha = alpha - alpha_decrement
+            if new_alpha > 0:
+                new_trail.append((pos, new_alpha))
+        self.dash_trail = new_trail
 
 class Enemy:
     def __init__(self):
@@ -210,39 +289,56 @@ class Enemy:
         self.color = (255, 0, 0)
         self.speed = 2
         self.health = 2
+        self.avoidance_radius = 20  # Radius for collision avoidance
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
 
     def move_towards_player(self, player, enemies):
-        # Proposed movement
-        new_x = self.x
-        new_y = self.y
+        # Adjusted movement to be more fluid
+        dx = player.x - self.x
+        dy = player.y - self.y
+        dist = math.hypot(dx, dy)
+        dx, dy = dx / dist, dy / dist  # Normalize
 
-        if self.x < player.x:
-            new_x += self.speed
-        elif self.x > player.x:
-            new_x -= self.speed
-        if self.y < player.y:
-            new_y += self.speed
-        elif self.y > player.y:
-            new_y -= self.speed
+        # Potential new position
+        new_x = self.x + dx * self.speed
+        new_y = self.y + dy * self.speed
 
-        # Check for collision with other enemies
-        for enemy in enemies:
-            if enemy != self and self.collides_with(new_x, new_y, enemy):
-                return  # Skip movement if collision detected
+        # Avoidance behavior
+        new_x, new_y = self.avoid_collisions(new_x, new_y, enemies)
 
         # Update position
         self.x = new_x
         self.y = new_y
+
+    def avoid_collisions(self, new_x, new_y, enemies):
+        for enemy in enemies:
+            if enemy != self and self.too_close(new_x, new_y, enemy):
+                # Calculate direction vector from enemy to self
+                avoid_dx, avoid_dy = new_x - enemy.x, new_y - enemy.y
+                avoid_dist = math.hypot(avoid_dx, avoid_dy)
+
+                # If too close, adjust position to avoid collision
+                if avoid_dist < self.avoidance_radius:
+                    # Normalize the direction vector
+                    avoid_dx, avoid_dy = avoid_dx / avoid_dist, avoid_dy / avoid_dist
+                    # Move away from the other enemy
+                    new_x += avoid_dx * self.speed
+                    new_y += avoid_dy * self.speed
+
+        return new_x, new_y
+
+    def too_close(self, x, y, other):
+        # Check if the current enemy position is too close to another enemy
+        return math.hypot(x - other.x, y - other.y) < self.avoidance_radius
 
     def collides_with(self, x, y, other):
         return (x < other.x + other.size and x + self.size > other.x and
                 y < other.y + other.size and y + self.size > other.y)
 
     def take_damage(self, coins):
-        self.health -= 1
+        self.health -= player.attackdmg
         if self.health <= 0:
             for _ in range(self.vertices):
                 coins.append(Coin(self.x, self.y))
@@ -421,7 +517,8 @@ while running:
             enemies.append(chosen_enemy_type())
 
         # Increase the spawn count following the power of 1.5 rule
-        spawn_count = int(spawn_count ** 1.5)
+        if spawn_count < 20:
+            spawn_count = int(spawn_count ** 1.3)
 
     current_time = pygame.time.get_ticks()
 
@@ -438,10 +535,9 @@ while running:
     if keys[pygame.K_s]:
         player.move(0, 1)
 
-
-    player.speed = 5
     # Update and draw player
     player.draw(screen)
+    player.update(current_time)
 
     move_items_towards_player(coins + experience_points, player)
 
