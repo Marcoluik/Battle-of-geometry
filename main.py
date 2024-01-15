@@ -185,8 +185,8 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.size = 20
-        self.color = (255, 255, 255)  # Assuming white color
+        self.size = 25
+        self.color = (200, 200, 200)  # Assuming white color
         self.speed = 5
         self.health = 3
         self.dash_speed = 15  # Adjusted for multi-frame dash
@@ -210,7 +210,33 @@ class Player:
         # Draw the player
         center_x = self.x + self.size // 2
         center_y = self.y + self.size // 2
-        pygame.draw.circle(screen, self.color, (center_x, center_y), self.size // 2)
+        pygame.draw.circle(screen, (0,255,255), (center_x, center_y), self.size // 2)
+
+
+
+        # Draw an ellipse on top of the circle to create a UFO effect
+        ellipse_width = self.size * 2  # Adjust the width as needed
+        ellipse_height = self.size * 0.8  # Adjust the height as needed
+        ellipse_x = center_x - ellipse_width // 2
+        ellipse_y = center_y - ellipse_height // 2.4
+        pygame.draw.ellipse(screen, self.color, (ellipse_x, ellipse_y, ellipse_width, ellipse_height))
+
+        # Draw the player
+        center_x = self.x + self.size // 2
+        center_y = self.y + self.size // 2.2
+        pygame.draw.circle(screen, (0, 255, 0), (center_x, center_y), self.size // 6)
+
+        # Draw the player
+        center_x = self.x + self.size // 1.1
+        center_y = self.y + self.size // 2
+        pygame.draw.circle(screen, (0, 255, 0), (center_x, center_y), self.size // 6)
+
+        # Draw the player
+        center_x = self.x + self.size // 8
+        center_y = self.y + self.size // 2
+        pygame.draw.circle(screen, (0, 255, 0), (center_x, center_y), self.size // 6)
+
+
 
     def move(self, dx, dy):
         new_x = self.x + dx * self.speed
@@ -472,29 +498,37 @@ class Experience(Item):
 class Tiles(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        tile_size = 32
-        rows = HEIGHT // tile_size + 1
-        cols = WIDTH // tile_size + 1
-        center_x, center_y = WIDTH // 2, HEIGHT // 2
-        max_radius = min(center_x, center_y)  # Radius for the brightest area
+        self.tile_size = 32
+        self.randomm = random.choice(
+            ["Moon", "Red_Moon", "Green_Moon", "Blue_Moon", "Yellow_Moon", "Cyan_Moon", "Purple_Moon"])
+        self.rows = HEIGHT // self.tile_size + 1
+        self.cols = WIDTH // self.tile_size + 1
+        self.center_x, self.center_y = WIDTH // 2, HEIGHT // 2
+        self.max_radius = min(self.center_x, self.center_y)  # Radius for the brightest area
+        self.update_interval = 300  # Number of frames to wait before updatin
+        self.last_update_time = pygame.time.get_ticks()  # Last update time
+        self.horizontal_shift = 0  # Horizontal shift for the moon
         self.tiles = []
+        self.generate_tiles()  # Initial tile generation
+
+    def generate_tiles(self):
 
 
-        randomm = random.choice(["Moon", "Red_Moon", "Green_Moon", "Blue_Moon","Yellow_Moon", "Cyan_Moon", "Purple_Moon"])
+        self.tiles.clear()  # Clear existing tiles
+        for i in range(self.cols):
+            for k in range(self.rows):
+                tile_chords = (i * self.tile_size + self.horizontal_shift, k * self.tile_size)
+                tile_rect = pygame.Rect(tile_chords[0], tile_chords[1], self.tile_size, self.tile_size)
 
-        for i in range(cols):
-            for k in range(rows):
-                tile_chords = (i * tile_size, k * tile_size)
-                tile_rect = pygame.Rect(tile_chords[0], tile_chords[1], tile_size, tile_size)
-
-                # Calculate the distance from the center
-                distance = math.sqrt((tile_chords[0] - center_x)**2 + (tile_chords[1] - center_y)**2)
+                # Calculate the distance from the shifted center
+                distance = math.sqrt((tile_chords[0] - (self.center_x + self.horizontal_shift)) ** 2 +
+                                     (tile_chords[1] - self.center_y) ** 2)
 
                 # Adjust depth based on the distance from the center
-                if distance < max_radius:
+                if distance < self.max_radius:
                     depth = 150
                 else:
-                    depth = max(0, 150 - (distance - max_radius))
+                    depth = max(0, 150 - (distance - self.max_radius))
 
                 offset = random.randint(-40, 40)
                 depth = max(0, min(150, depth + offset))
@@ -508,8 +542,19 @@ class Tiles(pygame.sprite.Sprite):
                     "Purple_Moon": (depth, 0, depth)
                 }
 
-                tile = {"rect": tile_rect, "color": moon_colors[randomm]}
+                tile = {"rect": tile_rect, "color": moon_colors[self.randomm]}
                 self.tiles.append(tile)
+
+    def update(self):
+        #self.randomm = random.choice(
+            #["Moon", "Red_Moon", "Green_Moon", "Blue_Moon", "Yellow_Moon", "Cyan_Moon", "Purple_Moon"])
+        current_time = pygame.time.get_ticks()
+        # Check if the current time exceeds the last update time by the update interval
+        if current_time - self.last_update_time > self.update_interval:
+            self.horizontal_shift += self.tile_size  # Increase the horizontal shift
+            self.generate_tiles()  # Generate new tiles
+            self.last_update_time = current_time  # Update the last update time
+
 
 
 player = Player(WIDTH // 2, HEIGHT // 2)
@@ -570,6 +615,9 @@ while running:
     # Update and draw player
     player.draw(screen)
     player.update(current_time)
+    # Update game state
+    tiles.update()
+
 
     move_items_towards_player(coins + experience_points, player)
 
