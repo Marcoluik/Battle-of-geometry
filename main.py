@@ -10,7 +10,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Battle of geometry")
 enemy_spawn_time = 2  # Timer for enemy spawning
 spawn_interval = 5000  # 10 seconds in milliseconds
-spawn_count = 3  # Initial number of enemies to spawn
+spawn_count = 2  # Initial number of enemies to spawn
 # Define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -50,7 +50,7 @@ def start_screen(screen):
             if event.type == pygame.KEYDOWN:
                 waiting = False
 
-def generate_safe_spawn(player, min_distance=100):
+def generate_safe_spawn(player, min_distance=800):
     while True:
         x = random.randint(0, WIDTH)
         y = random.randint(0, HEIGHT)
@@ -166,11 +166,20 @@ def move_items_towards_player(items, player, move_speed=4, attraction_radius=150
         dx, dy = player.x - item.x, player.y - item.y
         distance = math.sqrt(dx**2 + dy**2)
         if distance < attraction_radius:
-            # Normalize the direction
-            dx, dy = dx / distance, dy / distance
-            # Move the item towards the player
-            item.x += dx * move_speed
-            item.y += dy * move_speed
+            if distance < attraction_radius/2:
+                #Normalize the direction
+                dx, dy = dx / distance, dy / distance
+                # Move the item towards the player
+                item.x += dx * move_speed * 2
+                item.y += dy * move_speed * 2
+
+            else:
+                # Normalize the direction
+                dx, dy = dx / distance, dy / distance
+                # Move the item towards the player
+                item.x += dx * move_speed
+                item.y += dy * move_speed
+
 
 class Player:
     def __init__(self, x, y):
@@ -466,17 +475,40 @@ class Tiles(pygame.sprite.Sprite):
         tile_size = 32
         rows = HEIGHT // tile_size + 1
         cols = WIDTH // tile_size + 1
+        center_x, center_y = WIDTH // 2, HEIGHT // 2
+        max_radius = min(center_x, center_y)  # Radius for the brightest area
         self.tiles = []
+
+
+        randomm = random.choice(["Moon", "Red_Moon", "Green_Moon", "Blue_Moon","Yellow_Moon", "Cyan_Moon", "Purple_Moon"])
+
         for i in range(cols):
             for k in range(rows):
-                tile_chords = (i*tile_size, k*tile_size)
+                tile_chords = (i * tile_size, k * tile_size)
                 tile_rect = pygame.Rect(tile_chords[0], tile_chords[1], tile_size, tile_size)
-                offset = random.randint(-20, 20)
-                depth = (HEIGHT - tile_chords[1]) / HEIGHT * 255 + offset
-                depth = max(0, min(100-offset, depth))
 
-                tile_color = (depth, depth, depth)
-                tile = {"rect": tile_rect, "color": tile_color}
+                # Calculate the distance from the center
+                distance = math.sqrt((tile_chords[0] - center_x)**2 + (tile_chords[1] - center_y)**2)
+
+                # Adjust depth based on the distance from the center
+                if distance < max_radius:
+                    depth = 150
+                else:
+                    depth = max(0, 150 - (distance - max_radius))
+
+                offset = random.randint(-40, 40)
+                depth = max(0, min(150, depth + offset))
+                moon_colors = {
+                    "Moon": (depth, depth, depth),
+                    "Red_Moon": (depth, 0, 0),
+                    "Green_Moon": (0, depth, 0),
+                    "Blue_Moon": (0, 0, depth),
+                    "Yellow_Moon": (depth, depth, 0),
+                    "Cyan_Moon": (0, depth, depth),
+                    "Purple_Moon": (depth, 0, depth)
+                }
+
+                tile = {"rect": tile_rect, "color": moon_colors[randomm]}
                 self.tiles.append(tile)
 
 
@@ -517,7 +549,7 @@ while running:
             enemies.append(chosen_enemy_type())
 
         # Increase the spawn count following the power of 1.5 rule
-        if spawn_count < 20:
+        if spawn_count < 8:
             spawn_count = int(spawn_count ** 1.3)
 
     current_time = pygame.time.get_ticks()
