@@ -1,7 +1,7 @@
 import pygame
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-WIDTH, HEIGHT = 1080, 720
+WIDTH, HEIGHT = 1080, 540
 clock = pygame.time.Clock()
 
 class screenz:
