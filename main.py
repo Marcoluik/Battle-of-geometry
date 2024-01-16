@@ -9,6 +9,7 @@ import projectile_file
 import tile_file
 from upgrade_file import upgrade_window
 from magnet_file import move_items_towards_player
+
 # Initialize Pygame
 pygame.init()
 
@@ -60,7 +61,7 @@ while running:
             if distance != 0:
                 dx, dy = dx / distance, dy / distance
                 projectiles.append(projectile_file.Projectile(player.x, player.y, dx, dy))
-    for tile_data in tiles.tiles:
+    for tile_data in tiles.current_moon_tiles + tiles.next_moon_tiles:
         pygame.draw.rect(screen, tile_data["color"], tile_data["rect"])
     if pygame.time.get_ticks() - enemy_spawn_time > spawn_interval:
         enemy_spawn_time = pygame.time.get_ticks()  # Reset spawn timer
