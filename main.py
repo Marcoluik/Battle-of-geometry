@@ -468,12 +468,22 @@ class Projectile:
         self.dx = dx
         self.dy = dy
 
+        self.image = pygame.image.load("FrostLaser.png").convert_alpha()
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
     def move(self):
         self.x += self.dx * self.speed
         self.y += self.dy * self.speed
+        self.rect.center = (self.x, self.y)
+
+        # Calculate the angle (in degrees)
+        angle = math.degrees(math.atan2(-self.dy, self.dx))
+        self.rotated_image = pygame.transform.rotate(self.image, angle)
+        self.rect = self.rotated_image.get_rect(center=self.rect.center)
+
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
+        screen.blit(self.rotated_image, self.rect)
 
     def collides_with(self, other):
         return (self.x < other.x + other.size and self.x + self.size > other.x and
@@ -505,7 +515,7 @@ class Tiles(pygame.sprite.Sprite):
         self.cols = WIDTH // self.tile_size + 2  # +2 to accommodate the sliding in of the new moon
         self.center_x, self.center_y = WIDTH // 2, HEIGHT // 2
         self.max_radius = min(self.center_x, self.center_y)
-        self.update_interval = 50
+        self.update_interval = 400
         self.last_update_time = pygame.time.get_ticks()
         self.horizontal_shift = 0
         self.moon_colors_queue = deque(self.generate_moon_sequence(10))
@@ -562,7 +572,7 @@ class Tiles(pygame.sprite.Sprite):
         print("Yes")
         current_time = pygame.time.get_ticks()
         if current_time - self.last_update_time > self.update_interval:
-            self.horizontal_shift += self.tile_size / 4  # Adjust the speed of the slide
+            self.horizontal_shift += self.tile_size /4  # Adjust the speed of the slide
 
             # Update the positions of current and next moon tiles
             for tile in self.current_moon_tiles:
