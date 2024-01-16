@@ -512,8 +512,6 @@ class Tiles(pygame.sprite.Sprite):
         self.generate_tiles()  # Initial tile generation
 
     def generate_tiles(self):
-
-
         self.tiles.clear()  # Clear existing tiles
         for i in range(self.cols):
             for k in range(self.rows):
@@ -546,8 +544,6 @@ class Tiles(pygame.sprite.Sprite):
                 self.tiles.append(tile)
 
     def update(self):
-        #self.randomm = random.choice(
-            #["Moon", "Red_Moon", "Green_Moon", "Blue_Moon", "Yellow_Moon", "Cyan_Moon", "Purple_Moon"])
         current_time = pygame.time.get_ticks()
         # Check if the current time exceeds the last update time by the update interval
         if current_time - self.last_update_time > self.update_interval:
