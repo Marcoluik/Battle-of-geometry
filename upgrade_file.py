@@ -1,8 +1,8 @@
 import pygame
-import player_file
+import screens
 
 
-WIDTH, HEIGHT = 1500, 800
+WIDTH, HEIGHT = screens.WIDTH, screens.HEIGHT
 WHITE = (255, 255, 255)
 BLACK = (0, 0 ,0)
 clock = pygame.time.Clock()

@@ -3,10 +3,11 @@ import math
 import random
 import player_file
 import xp_coins
+import screens
 
-WIDTH, HEIGHT = 1500, 800
+WIDTH, HEIGHT = screens.WIDTH, screens.HEIGHT
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
-def generate_safe_spawn(player, min_distance=800):
+def generate_safe_spawn(player, min_distance=400):
     while True:
         x = random.randint(0, WIDTH)
         y = random.randint(0, HEIGHT)

@@ -12,8 +12,10 @@ from magnet_file import move_items_towards_player
 # Initialize Pygame
 pygame.init()
 
+WIDTH = screens.WIDTH
+HEIGHT = screens.HEIGHT
+
 # Set up the display
-WIDTH, HEIGHT = 1500, 800
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Battle of geometry")
 enemy_spawn_time = 2  # Timer for enemy spawning
@@ -65,6 +67,7 @@ while running:
 
         # Spawn enemies based on spawn_count
         for _ in range(spawn_count):
+
             enemy_types = [enemy_file.TriangleEnemy, enemy_file.SquareEnemy, enemy_file.PentagonEnemy, enemy_file.HexagonEnemy]
             chosen_enemy_type = random.choice(enemy_types)
             enemies.append(chosen_enemy_type())

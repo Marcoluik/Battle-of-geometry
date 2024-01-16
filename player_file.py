@@ -1,5 +1,6 @@
 import pygame
-WIDTH, HEIGHT = 1500, 800
+import screens
+WIDTH, HEIGHT = screens.WIDTH, screens.HEIGHT
 
 class Player:
     def __init__(self, x, y):

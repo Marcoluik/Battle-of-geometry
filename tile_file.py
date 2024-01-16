@@ -1,7 +1,8 @@
 import pygame
 import random
 import math
-WIDTH, HEIGHT = 1500, 800
+import screens
+WIDTH, HEIGHT = screens.WIDTH, screens.HEIGHT
 
 class Tiles(pygame.sprite.Sprite):
     def __init__(self):
