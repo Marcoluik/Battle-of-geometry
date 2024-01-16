@@ -1,5 +1,6 @@
 import pygame
 import math
+from settings import WHITE, HEIGHT, WIDTH, BLACK
 class Projectile:
     def __init__(self, x, y, dx, dy):
         self.x = x

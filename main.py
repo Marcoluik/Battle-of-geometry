@@ -9,12 +9,11 @@ import projectile_file
 import tile_file
 from upgrade_file import upgrade_window
 from magnet_file import move_items_towards_player
-
+from settings import WHITE, HEIGHT, WIDTH, BLACK, FPS
 # Initialize Pygame
 pygame.init()
 
-WIDTH = screens.WIDTH
-HEIGHT = screens.HEIGHT
+
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -23,13 +22,11 @@ enemy_spawn_time = 2  # Timer for enemy spawning
 spawn_interval = 5000  # 10 seconds in milliseconds
 spawn_count = 2  # Initial number of enemies to spawn
 # Define colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
+
 
 # Game clock
 clock = pygame.time.Clock()
-FPS = 60
-#font = pygame.font.SysFont(None, 36)
+
 font = pygame.font.Font("pixelletters.ttf",36)
 # Game loop flag
 running = True

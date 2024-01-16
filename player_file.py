@@ -1,6 +1,6 @@
 import pygame
 import screens
-WIDTH, HEIGHT = screens.WIDTH, screens.HEIGHT
+from settings import WHITE, HEIGHT, WIDTH, BLACK
 
 class Player:
     def __init__(self, x, y):

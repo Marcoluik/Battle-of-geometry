@@ -3,7 +3,7 @@ import random
 import math
 import screens
 from collections import deque
-WIDTH, HEIGHT = screens.WIDTH, screens.HEIGHT
+from settings import WHITE, HEIGHT, WIDTH, BLACK
 
 class Tiles(pygame.sprite.Sprite):
     def __init__(self):

@@ -2,7 +2,7 @@ import pygame
 import screens
 
 
-WIDTH, HEIGHT = screens.WIDTH, screens.HEIGHT
+from settings import WHITE, HEIGHT, WIDTH, BLACK
 WHITE = (255, 255, 255)
 BLACK = (0, 0 ,0)
 clock = pygame.time.Clock()

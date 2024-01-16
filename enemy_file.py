@@ -5,7 +5,7 @@ import player_file
 import xp_coins
 import screens
 
-WIDTH, HEIGHT = screens.WIDTH, screens.HEIGHT
+from settings import WHITE, HEIGHT, WIDTH, BLACK
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
 def generate_safe_spawn(player, min_distance=400):
     while True:
