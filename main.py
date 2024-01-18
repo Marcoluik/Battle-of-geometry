@@ -35,6 +35,7 @@ running = True
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
 enemies = []
 projectiles = []
+all_projectiles = pygame.sprite.Group()
 player_coins = 0
 coins = []
 player_experience = 0
@@ -57,7 +58,8 @@ while running:
             distance = (dx ** 2 + dy ** 2) ** 0.5
             if distance != 0:
                 dx, dy = dx / distance, dy / distance
-                projectiles.append(projectile_file.Projectile(player.x, player.y, dx, dy))
+                new_projectile = projectile_file.FrostLaser(player.x, player.y, dx, dy)
+                all_projectiles.add(new_projectile)
     for tile_data in tiles.current_moon_tiles + tiles.next_moon_tiles:
         pygame.draw.rect(screen, tile_data["color"], tile_data["rect"])
     if pygame.time.get_ticks() - enemy_spawn_time > spawn_interval:
@@ -94,6 +96,8 @@ while running:
     player.update(current_time)
     # Update game state
     tiles.update()
+    all_projectiles.update()
+    all_projectiles.draw(screen)
 
 
     move_items_towards_player(coins + experience_points, player)
@@ -134,7 +138,7 @@ while running:
 
     # Update and draw enemies
     for projectile in projectiles[:]:
-        projectile.move()
+        projectile.update()
         projectile.draw(screen)
         if projectile.x < 0 or projectile.x > WIDTH or projectile.y < 0 or projectile.y > HEIGHT:
             projectiles.remove(projectile)

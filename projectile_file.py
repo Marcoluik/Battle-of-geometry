@@ -2,62 +2,52 @@ import pygame
 import math
 from settings import WHITE, HEIGHT, WIDTH, BLACK
 
-def get_image(sheet, frame, width, height, scale, angle):
-    image = pygame.Surface((width, height)).convert_alpha()
-    image.blit(sheet, (0,0), ((frame*width), 0, width, height))
-    image = pygame.transform.scale(image, (width*scale, height*scale))
-    image = pygame.transform.rotate(image, angle)
-    image.set_colorkey((0, 0, 0))
 
-    return image
-class Projectile:
-    def __init__(self, x, y, dx, dy):
+class Projectile(pygame.sprite.Sprite):
+    def __init__(self, x, y, dx, dy, sprite_sheet, frame_width, frame_height):
+        super().__init__()
+        self.sprite_sheet = sprite_sheet
         self.x = x
         self.y = y
-        self.size = 5
-        self.color = (255, 255, 0)
-        self.speed = 10
         self.dx = dx
         self.dy = dy
-        self.stylesheet = ""
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+        self.speed = 10
+        self.frame_width = frame_width
+        self.frame_height = frame_height
+        self.current_frame = 0
+        self.angle = math.degrees(math.atan2(-self.dy, self.dx))  # Initialize angle before calling get_image
+        self.image = self.get_image(0, frame_width, frame_height)  # Get the first frame after setting the angle
+        self.rect = self.image.get_rect(center=(x, y))
 
+    def get_image(self, frame, width, height):
+        image = pygame.Surface((width, height), pygame.SRCALPHA)  # Use SRCALPHA to handle transparency
+        image.blit(self.sprite_sheet, (0, 0), (frame * width, 0, width, height))
+        image = pygame.transform.rotate(image, self.angle)  # Rotate the image by the current angle
+        image.set_colorkey(BLACK)  # Set transparency color
+        return image
 
-    def move(self):
+    def update(self):
         self.x += self.dx * self.speed
         self.y += self.dy * self.speed
         self.rect.center = (self.x, self.y)
-
         self.angle = math.degrees(math.atan2(-self.dy, self.dx))
-        self.rotated_image = pygame.transform.rotate(self.image, self.angle)
-        self.rect = self.rotated_image.get_rect(center=self.rect.center)
-
-
-    def draw(self, screen):
-        sprite = get_image(self.style_sheet, self.frame, 32, 32, 2, self.angle)
-        screen.blit(sprite, self.rect)
-
+        self.current_frame = (self.current_frame + 1) % 3  # Assuming you have 3 frames
+        self.image = self.get_image(self.current_frame, self.frame_width, self.frame_height)
 
     def collides_with(self, other):
-        return (self.x < other.x + other.size and self.x + self.size > other.x and
-                self.y < other.y + other.size and self.y + self.size > other.y)
-
-class Beam(Projectile):
-    def __init__(self):
-        super().__init__()
+        return self.rect.colliderect(other.rect)
 
 class Laser(Projectile):
-    def __init__(self):
-        super().__init__()
-        self.style_sheet = pygame.image.load("PureLaserSheet.png").convert_alpha()
+    def __init__(self, x, y, dx, dy):
+        sprite_sheet = pygame.image.load("PureLaserSheet.png").convert_alpha()
+        super().__init__(x, y, dx, dy, sprite_sheet, 32, 32)  # Assuming frame width and height are 32
 
 class FireLaser(Projectile):
-    def __init__(self):
-        super().__init__()
-        self.style_sheet = pygame.image.load("FireLaserSheet.png").convert_alpha()
+    def __init__(self, x, y, dx, dy):
+        sprite_sheet = pygame.image.load("FireLaserSheet.png").convert_alpha()
+        super().__init__(x, y, dx, dy, sprite_sheet, 32, 32)  # Assuming frame width and height are 32
 
-        self.rect = self.image.get_rect()
 class FrostLaser(Projectile):
-    def __init__(self):
-        super().__init__()
-        self.style_sheet = pygame.image.load("FrostLaserSheet.png").convert_alpha()
+    def __init__(self, x, y, dx, dy):
+        sprite_sheet = pygame.image.load("FrostLaserSheet.png").convert_alpha()
+        super().__init__(x, y, dx, dy, sprite_sheet, 32, 32)  # Assuming frame width and height are 32
