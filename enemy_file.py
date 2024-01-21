@@ -24,7 +24,7 @@ def get_image(sheet, frame, width, height, scale, angle):
 
     return image
 
-class Enemy:
+class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         safe_x, safe_y = generate_safe_spawn(player)
         self.x = safe_x
@@ -34,9 +34,22 @@ class Enemy:
         self.speed = 2
         self.health = 2
         self.avoidance_radius = 20  # Radius for collision avoidance
+        self.frame = 0
+        self.damage = 0
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
+        vector_enemy_player = (self.player_instance.x - self.x, self.player_instance.y - self.y)
+        if vector_enemy_player[0] < 0:
+            vinkel = -math.degrees(math.atan(vector_enemy_player[1] / vector_enemy_player[0])) + 90
+        else:
+            vinkel = -math.degrees(math.atan(vector_enemy_player[1] / vector_enemy_player[0])) - 90
+        print(vector_enemy_player[0])
+        sprite = get_image(self.style_sheet, self.frame, 32, 32, 2, vinkel)
+        if self.frame >= 2:
+            self.frame = 0
+        else:
+            self.frame += 1
+        screen.blit(sprite, (self.x, self.y))
 
     def move_towards_player(self, player, enemies):
         # Adjusted movement to be more fluid
@@ -94,87 +107,39 @@ class Enemy:
 class TriangleEnemy(Enemy):
     def __init__(self):
         super().__init__()
-        self.vertices = 3  # Triangle
-        self.color = (255, 0, 0)  # Red color
         self.health = 3  # Health value for TriangleEnemy
         self.size = 10
         self.speed = 4
+        self.damage = 1
         self.style_sheet = pygame.image.load("Images/SmallSpaceshipSpritesheetHorizontal.png").convert_alpha()
-        self.frame = 0
-
-    def draw(self, screen):
-        """radius = self.size
-        points = []
-        for i in range(3):
-            angle = math.radians(120 * i - 30)  # Equilateral triangle points
-            x = self.x + radius * math.cos(angle)
-            y = self.y + radius * math.sin(angle)
-            points.append((x, y))
-        pygame.draw.polygon(screen, self.color, points)"""
-        vector_enemy_player = (self.player_instance.x-self.x, self.player_instance.y-self.y)
-        if vector_enemy_player[0] < 0:
-            vinkel = -math.degrees(math.atan(vector_enemy_player[1]/vector_enemy_player[0]))+90
-        else:
-            vinkel = -math.degrees(math.atan(vector_enemy_player[1]/vector_enemy_player[0]))-90
-        print(vector_enemy_player[0])
-        sprite = get_image(self.style_sheet, self.frame, 32, 32, 2, vinkel)
-        if self.frame >= 2:
-            self.frame = 0
-        else:
-            self.frame+=1
-        screen.blit(sprite, (self.x, self.y))
-
-
 
 
 class SquareEnemy(Enemy):
     def __init__(self):
         super().__init__()
-        self.vertices = 4  # Square
-        self.color = (0, 255, 0)  # Green color
-        self.health = 4  # Health value for SquareEnemy
-        self.size = 15
-        self.speed = 3
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
-
+        self.health = 3  # Health value for TriangleEnemy
+        self.size = 10
+        self.speed = 4
+        self.damage = 1
+        self.style_sheet = pygame.image.load("Images/SmallSpaceshipSpritesheetHorizontal.png").convert_alpha()
 
 class PentagonEnemy(Enemy):
     def __init__(self):
-        super().__init__()
-        self.vertices = 5  # Pentagon
-        self.color = (0, 0, 255)  # Blue color
-        self.health = 5  # Health value for PentagonEnemy
-        self.size = 20
-        self.speed = 2
-
-    def draw(self, screen):
-        radius = self.size
-        points = []
-        for i in range(5):  # Pentagon has 5 sides
-            angle = math.radians(72 * i - 36)  # 360 degrees / 5 sides
-            x = self.x + radius * math.cos(angle)
-            y = self.y + radius * math.sin(angle)
-            points.append((x, y))
-        pygame.draw.polygon(screen, self.color, points)
+        #super().__init__()
+        pygame.sprite.Sprite.__init__(self)
+        self.health = 3  # Health value for TriangleEnemy
+        self.size = 10
+        self.speed = 4
+        self.damage = 1
+        self.style_sheet = pygame.image.load("Images/SmallSpaceshipSpritesheetHorizontal.png").convert_alpha()
 
 
 class HexagonEnemy(Enemy):
     def __init__(self):
         super().__init__()
-        self.vertices = 6
-        self.color = (255, 255, 0)  # Yellow color
-        self.health = 6  # Health value for HexagonEnemy
-        self.size = 30
-        self.speed = 1
+        self.health = 3  # Health value for TriangleEnemy
+        self.size = 10
+        self.speed = 4
+        self.damage = 1
+        self.style_sheet = pygame.image.load("Images/SmallSpaceshipSpritesheetHorizontal.png").convert_alpha()
 
-    def draw(self, screen):
-        radius = self.size
-        points = []
-        for i in range(6):  # Hexagon has 6 sides
-            angle = math.radians(60 * i - 30)  # 360 degrees / 6 sides
-            x = self.x + radius * math.cos(angle)
-            y = self.y + radius * math.sin(angle)
-            points.append((x, y))
-        pygame.draw.polygon(screen, self.color, points)

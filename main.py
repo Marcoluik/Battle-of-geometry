@@ -33,9 +33,8 @@ running = True
 
 
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
-enemies = []
-projectiles = []
 all_projectiles = pygame.sprite.Group()
+all_enemies = pygame.sprite.Group()
 player_coins = 0
 coins = []
 player_experience = 0
@@ -60,6 +59,7 @@ while running:
                 dx, dy = dx / distance, dy / distance
                 new_projectile = projectile_file.FrostLaser(player.x, player.y, dx, dy)
                 all_projectiles.add(new_projectile)
+
     for tile_data in tiles.current_moon_tiles + tiles.next_moon_tiles:
         pygame.draw.rect(screen, tile_data["color"], tile_data["rect"])
     if pygame.time.get_ticks() - enemy_spawn_time > spawn_interval:
@@ -70,9 +70,7 @@ while running:
 
             enemy_types = [enemy_file.TriangleEnemy, enemy_file.SquareEnemy, enemy_file.PentagonEnemy, enemy_file.HexagonEnemy]
             chosen_enemy_type = random.choice(enemy_types)
-            enemies.append(chosen_enemy_type())
-
-        # Increase the spawn count following the power of 1.5 rule
+            all_enemies.add(chosen_enemy_type())
         if spawn_count < 8:
             spawn_count = int(spawn_count ** 1.3)
 
@@ -131,33 +129,37 @@ while running:
     screen.blit(coin_text, (10, 10))
     exp_text = font.render(f"Experience: {player_experience}", True, WHITE)
     screen.blit(exp_text, (10, 40))
-    # Display player's health
     health_text = font.render(f"Health: {player.health}", True, WHITE)
     screen.blit(health_text, (10, 70))  # Position below the coin count
 
 
-    # Update and draw enemies
-    for projectile in projectiles[:]:
-        projectile.update()
-        projectile.draw(screen)
+    for projectile in all_projectiles:
+        all_projectiles.update()
+        all_projectiles.draw(screen)
+    for projectile in all_projectiles:
         if projectile.x < 0 or projectile.x > WIDTH or projectile.y < 0 or projectile.y > HEIGHT:
-            projectiles.remove(projectile)
+            projectile.kill()  # This removes the projectile from all groups
 
         # Update and draw enemies
-    for enemy in enemies[:]:
-        enemy.move_towards_player(player, enemies)
+    for enemy in all_enemies:
+        enemy.move_towards_player(player, all_enemies)
         enemy.draw(screen)
 
+        if enemy.collides_with(player.x, player.y, player):
+            player.take_damage(enemy.damage)
+        if enemy.take_damage(coins, experience_points):
+            enemies.remove(enemy)
+
         # Check collision with projectiles
-        for projectile in projectiles[:]:
+        for projectile in all_projectiles[:]:
             if projectile.collides_with(enemy):
                 projectiles.remove(projectile)
                 if enemy.take_damage(coins, experience_points):  # Pass coins list to take_damage
                     enemies.remove(enemy)
                     break
-    for enemy in enemies:
+    for enemy in all_enemies:
         if player.collides_with(enemy):
-            player.health -= 1  # Reduce player health
+            player.health -= enemy.damage  # Reduce player health
             # Optionally, you can remove the enemy or move it away
             # enemies.remove(enemy)  # Remove the enemy
             # or reposition the enemy
