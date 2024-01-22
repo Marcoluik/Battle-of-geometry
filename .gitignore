@@ -2,3 +2,5 @@
 *.pyc
 .idea/Battle-of-geometry.iml
 .idea/misc.xml
+__pycache__/
+
