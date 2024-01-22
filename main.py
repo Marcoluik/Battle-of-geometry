@@ -30,6 +30,11 @@ font = pygame.font.Font("pixelletters.ttf",36)
 # Game loop flag
 running = True
 
+#sound effects
+
+shooting_sfx = pygame.mixer.Sound("ShootingSound.ogg")
+
+
 
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
 enemies = []
@@ -59,6 +64,7 @@ while running:
             distance = (dx ** 2 + dy ** 2) ** 0.5
             if distance != 0:
                 dx, dy = dx / distance, dy / distance
+                shooting_sfx.play()
                 projectiles.append(projectile_file.Projectile(player.x, player.y, dx, dy))
     for tile_data in tiles.current_moon_tiles + tiles.next_moon_tiles:
         pygame.draw.rect(screen, tile_data["color"], tile_data["rect"])
