@@ -30,9 +30,25 @@ font = pygame.font.Font("pixelletters.ttf",36)
 # Game loop flag
 running = True
 
-#sound effects
 
-shooting_sfx = pygame.mixer.Sound("ShootingSound.ogg")
+#sound effects
+shooting_sfx = pygame.mixer.Sound("laserpew.ogg")
+game_over_sfx = pygame.mixer.Sound("gameoversound.ogg")
+damage_taken_sfx = pygame.mixer.Sound('spawn.ogg')
+enemy_death_sfx = pygame.mixer.Sound('explosion01.ogg')
+coin_pickup_sfx = pygame.mixer.Sound('1_Coins.ogg')
+
+
+#sound effects adjusting volumes
+shooting_sfx.set_volume(0.5)
+game_over_sfx.set_volume(0.8)
+damage_taken_sfx.set_volume(0.1)
+enemy_death_sfx.set_volume(0.05)
+coin_pickup_sfx.set_volume(0.2)
+
+pygame.mixer.music.load('Space-Sprinkles.ogg')
+pygame.mixer.music.set_volume(0.06)
+pygame.mixer.music.play(2, 00.00, 50)
 
 
 
@@ -111,6 +127,7 @@ while running:
         coin.draw(screen)
         if player.collides_with(coin):
             coins.remove(coin)
+            coin_pickup_sfx.play()
             player_coins += 1
 
     # Handle experience points
@@ -160,6 +177,7 @@ while running:
                     explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x-32, enemy.y-32, 3)
                     explosions.append(explosion_effect)
                     enemies.remove(enemy)
+                    enemy_death_sfx.play()
                     break
 
     for explosion_effect in explosions[:]:
@@ -177,8 +195,12 @@ while running:
             enemy.x = random.randint(0, WIDTH)
             enemy.y = random.randint(0, HEIGHT)
 
+            if player.health > 0:
+                damage_taken_sfx.play()
+
             if player.health <= 0:
                 print("Player has died!")
+                game_over_sfx.play()
                 running = False
                 screen_manager.game_over_screen(screen, player_coins)  # Display game over screen
                 # Reset game state for a new game
