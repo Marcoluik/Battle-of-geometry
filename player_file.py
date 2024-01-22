@@ -12,13 +12,15 @@ class Player:
         self.health = 3
         self.dash_speed = 15  # Adjusted for multi-frame dash
         self.dash_duration = 10  # Dash duration in frames
-        self.dash_cooldown = 500  # Cooldown in milliseconds
+        self.dash_cooldown = 2000  # Cooldown in milliseconds
         self.last_dash = 0  # Time since last dash
         self.is_dashing = False
         self.dash_trail = []  # Store positions for the dash trail
         self.dash_frames_remaining = 0
         self.speed_reduction_per_frame = 0
         self.attackdmg = 1
+        self.shoot_cd = 500
+        self.last_shot = 0
 
     def draw(self, screen):
         # Draw the dash trail

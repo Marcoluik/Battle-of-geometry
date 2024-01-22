@@ -20,6 +20,7 @@ pygame.display.set_caption("Battle of geometry")
 enemy_spawn_time = 2  # Timer for enemy spawning
 spawn_interval = 5000  # 10 seconds in milliseconds
 spawn_count = 2  # Initial number of enemies to spawn
+next_lvl = 20
 # Define colors
 
 
@@ -46,6 +47,8 @@ screen_manager.start_screen(screen)
 
 while running:
     screen.fill(BLACK)
+    current_time = pygame.time.get_ticks()
+    dt = clock.tick()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -55,9 +58,10 @@ while running:
             mx, my = pygame.mouse.get_pos()
             dx, dy = mx - player.x, my - player.y
             distance = (dx ** 2 + dy ** 2) ** 0.5
-            if distance != 0:
+            if distance != 0 and current_time - player.last_shot > player.shoot_cd:
                 dx, dy = dx / distance, dy / distance
                 projectiles.append(projectile_file.Projectile(player.x, player.y, dx, dy))
+                player.last_shot = current_time  # Update the time when the player last shot
     for tile_data in tiles.current_moon_tiles + tiles.next_moon_tiles:
         pygame.draw.rect(screen, tile_data["color"], tile_data["rect"])
     if pygame.time.get_ticks() - enemy_spawn_time > spawn_interval:
@@ -74,7 +78,7 @@ while running:
         if spawn_count < 8:
             spawn_count = int(spawn_count ** 1.3)
 
-    current_time = pygame.time.get_ticks()
+
 
     # Player movement
     keys = pygame.key.get_pressed()
@@ -113,23 +117,23 @@ while running:
             # Handle experience gain here, for example:
             player_experience += 1
 
-    if player_experience >= 20:
-        player_experience -= 20  # Deduct exp after upgrading
-        upgrade = upgrade_window(screen, player_experience)
-        if upgrade == 1:
-            projectile.size += 1
-        elif upgrade == 2:
-            player.health += 1
-        elif upgrade == 3:
-            player.attackdmg += 1
+
         # Display coin count
-    coin_text = font.render(f"Coins: {player_coins}", True, WHITE)
-    screen.blit(coin_text, (10, 10))
-    exp_text = font.render(f"Experience: {player_experience}", True, WHITE)
-    screen.blit(exp_text, (10, 40))
-    # Display player's health
-    health_text = font.render(f"Health: {player.health}", True, WHITE)
-    screen.blit(health_text, (10, 70))  # Position below the coin count
+
+
+    pygame.draw.rect(screen, "black", (0, 0, WIDTH, 30))
+    pygame.draw.rect(screen, "green", (0, 0, WIDTH * (player_experience/next_lvl), 30))
+    hearthicon = pygame.image.load("Images/Hearth.png")
+    hearthicon = pygame.transform.scale(hearthicon, (50, 50))
+    for i in range(player.health):
+        screen.blit(hearthicon, (20+i*40, 40))
+    moneyicon = pygame.image.load("Images/Money.png")
+    moneyicon = pygame.transform.scale(moneyicon, (50, 50))
+    screen.blit(moneyicon, (20, 90))
+    coin_text = font.render(f"{player_coins}", True, WHITE)
+    screen.blit(coin_text, (70, 100))
+
+
 
 
     # Update and draw enemies
@@ -138,6 +142,23 @@ while running:
         projectile.draw(screen)
         if projectile.x < 0 or projectile.x > WIDTH or projectile.y < 0 or projectile.y > HEIGHT:
             projectiles.remove(projectile)
+
+    if player_experience >= next_lvl:
+        player_experience -= next_lvl  # Deduct exp after upgrading
+        next_lvl *= 2
+        upgrade = upgrade_window(screen, player_experience)
+        if upgrade == 1:
+            player.speed += 2
+        elif upgrade == 2:
+            player.health += 1
+        elif upgrade == 3:
+            player.attackdmg += 1
+        elif upgrade == 4:
+            player.dash_duration += 3
+        elif upgrade == 5:
+            player.dash_cooldown -= 500
+        elif upgrade == 6:
+            player.shoot_cd -= 150
 
         # Update and draw enemies
     for enemy in enemies[:]:

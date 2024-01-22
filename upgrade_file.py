@@ -1,6 +1,6 @@
 import pygame
 import screens
-
+import random
 
 from settings import WHITE, HEIGHT, WIDTH, BLACK
 WHITE = (255, 255, 255)
@@ -10,10 +10,19 @@ def upgrade_window(screen, experience):
     upgrade_font = pygame.font.Font("pixelletters.ttf", 36)
 
     upgrade_text = upgrade_font.render('Choose an Upgrade', True, WHITE)
-    button_texts = ['Bullet spread', 'Health boost', 'Attack damage']
+    button_texts = ['Movement speed', 'Health boost', 'Attack damage',"Dash length", "Shorter dash cooldown", "Shoot faster" ]
+    upgrade_mapping = {
+        'Movement speed': 1,
+        'Health boost': 2,
+        'Attack damage': 3,
+        'Dash length': 4,
+        'Shorter dash cooldown': 5,
+        'Shoot faster': 6
+    }
 
+    selected_texts = random.sample(button_texts, 3)  # Randomly select three options
     buttons = []
-    for i, text in enumerate(button_texts):
+    for i, text in enumerate(selected_texts):
         button_x = WIDTH // 2 - 100
         button_y = HEIGHT // 2 - 50 + i * 60
         button_width = 200
@@ -28,22 +37,12 @@ def upgrade_window(screen, experience):
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                for index, button in enumerate(buttons):
-                    bx, by, bw, bh, _ = button
+                for button in buttons:
+                    bx, by, bw, bh, btn_text = button
                     if bx <= mouse_x <= bx + bw and by <= mouse_y <= by + bh:
-                        # Handle each button click separately
-                        if index == 0:
-                            # Handle 'Bullet spread' button
-                            print("Bullet size selected")
-                            return 1
-                        elif index == 1:
-                            # Handle 'Health boost' button
-                            print("Health boost selected")
-                            return 2
-                        elif index == 2:
-                            # Handle 'Attack damage' button
-                            print("Attack damage selected")
-                            return 3
+                        upgrade_id = upgrade_mapping[btn_text]
+                        print(f"{btn_text} selected")
+                        return upgrade_id
 
                         upgrade_selected = True
                         break
