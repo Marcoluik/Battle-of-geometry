@@ -15,6 +15,7 @@ def generate_safe_spawn(player, min_distance=400):
         if distance >= min_distance:
             return x, y
 
+
 def get_image(sheet, frame, width, height, scale, angle):
     image = pygame.Surface((width, height)).convert_alpha()
     image.blit(sheet, (0,0), ((frame*width), 0, width, height))
@@ -23,6 +24,44 @@ def get_image(sheet, frame, width, height, scale, angle):
     image.set_colorkey((0, 0, 0))
 
     return image
+
+
+class ParticleAnimation:
+    def __init__(self, spritesheet_path, rows, cols, screen, x, y, scale):
+        self.spritesheet = pygame.image.load(spritesheet_path)
+        self.rows = rows
+        self.cols = cols
+        self.screen = screen
+        self.scale = scale
+        self.image_width = self.spritesheet.get_width() // cols
+        self.image_height = self.spritesheet.get_height() // rows
+        self.scaled_width = self.image_width * scale
+        self.scaled_height = self.image_height * scale
+        self.images = self.get_images()
+        self.current_frame = 0
+        self.x = x
+        self.y = y
+
+    def get_images(self):
+        images = []
+        for i in range(self.rows):
+            for j in range(self.cols):
+                image = pygame.transform.scale(
+                    self.spritesheet.subsurface(
+                        j * self.image_width, i * self.image_height,
+                        self.image_width, self.image_height
+                    ),
+                    (self.scaled_width, self.scaled_height)
+                )
+                images.append(image)
+        return images
+
+    def update(self):
+        self.current_frame = (self.current_frame + 0.5) % len(self.images)
+
+    def draw(self):
+        self.screen.blit(self.images[math.floor(self.current_frame)], (self.x, self.y))
+
 
 class Enemy:
     def __init__(self):
@@ -35,8 +74,9 @@ class Enemy:
         self.health = 2
         self.avoidance_radius = 20  # Radius for collision avoidance
 
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
+
+
+
 
     def move_towards_player(self, player, enemies):
         # Adjusted movement to be more fluid
@@ -82,7 +122,7 @@ class Enemy:
         return (x < other.x + other.size and x + self.size > other.x and
                 y < other.y + other.size and y + self.size > other.y)
 
-    def take_damage(self, coins, experience_points):
+    def take_damage(self, coins, experience_points, screen):
         self.health -= player.attackdmg
         if self.health <= 0:
             for _ in range(self.vertices):

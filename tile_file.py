@@ -67,7 +67,7 @@ class Tiles(pygame.sprite.Sprite):
 
 
     def update(self):
-        print("Yes")
+
         current_time = pygame.time.get_ticks()
         if current_time - self.last_update_time > self.update_interval:
             self.horizontal_shift += self.tile_size /4  # Adjust the speed of the slide

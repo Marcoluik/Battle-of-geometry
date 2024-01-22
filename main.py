@@ -39,6 +39,7 @@ coins = []
 player_experience = 0
 experience_points = []
 tiles = tile_file.Tiles()
+explosions = []
 
 screen_manager = screens.screenz()
 screen = screen_manager.screen
@@ -148,9 +149,18 @@ while running:
         for projectile in projectiles[:]:
             if projectile.collides_with(enemy):
                 projectiles.remove(projectile)
-                if enemy.take_damage(coins, experience_points):  # Pass coins list to take_damage
+                if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
+                    explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x-32, enemy.y-32, 3)
+                    explosions.append(explosion_effect)
                     enemies.remove(enemy)
                     break
+
+    for explosion_effect in explosions[:]:
+        explosion_effect.update()
+        explosion_effect.draw()
+        if explosion_effect.current_frame == len(explosion_effect.images) - 1:
+            explosions.remove(explosion_effect)
+
     for enemy in enemies:
         if player.collides_with(enemy):
             player.health -= 1  # Reduce player health
