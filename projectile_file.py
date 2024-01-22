@@ -11,7 +11,8 @@ class Projectile:
         self.dx = dx
         self.dy = dy
 
-        self.image = pygame.image.load("FrostLaser.png").convert_alpha()
+        self.image = pygame.image.load("Images/LaserSprite.png").convert_alpha()
+
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def move(self):
@@ -20,7 +21,7 @@ class Projectile:
         self.rect.center = (self.x, self.y)
 
         # Calculate the angle (in degrees)
-        angle = math.degrees(math.atan2(-self.dy, self.dx))
+        angle = math.degrees(math.atan2(-self.dy, self.dx))+90
         self.rotated_image = pygame.transform.rotate(self.image, angle)
         self.rect = self.rotated_image.get_rect(center=self.rect.center)
 

@@ -47,6 +47,7 @@ screen_manager.start_screen(screen)
 
 while running:
     screen.fill(BLACK)
+    pygame.mouse.set_cursor(pygame.cursors.broken_x)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -67,7 +68,7 @@ while running:
         # Spawn enemies based on spawn_count
         for _ in range(spawn_count):
 
-            enemy_types = [enemy_file.TriangleEnemy, enemy_file.SquareEnemy, enemy_file.PentagonEnemy] # 
+            enemy_types = [enemy_file.TriangleEnemy, enemy_file.SquareEnemy, enemy_file.PentagonEnemy] #
             chosen_enemy_type = random.choice(enemy_types)
             enemies.append(chosen_enemy_type())
 
