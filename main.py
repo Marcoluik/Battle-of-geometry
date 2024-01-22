@@ -16,7 +16,6 @@ pygame.init()
 
 
 # Set up the display
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Battle of geometry")
 enemy_spawn_time = 2  # Timer for enemy spawning
 spawn_interval = 5000  # 10 seconds in milliseconds
@@ -42,6 +41,7 @@ experience_points = []
 tiles = tile_file.Tiles()
 
 screen_manager = screens.screenz()
+screen = screen_manager.screen
 screen_manager.start_screen(screen)
 
 while running:
@@ -66,7 +66,7 @@ while running:
         # Spawn enemies based on spawn_count
         for _ in range(spawn_count):
 
-            enemy_types = [enemy_file.TriangleEnemy, enemy_file.SquareEnemy, enemy_file.PentagonEnemy, enemy_file.HexagonEnemy]
+            enemy_types = [enemy_file.TriangleEnemy, enemy_file.SquareEnemy, enemy_file.PentagonEnemy] # 
             chosen_enemy_type = random.choice(enemy_types)
             enemies.append(chosen_enemy_type())
 

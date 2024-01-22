@@ -97,7 +97,7 @@ class TriangleEnemy(Enemy):
         self.vertices = 3  # Triangle
         self.color = (255, 0, 0)  # Red color
         self.health = 3  # Health value for TriangleEnemy
-        self.size = 20
+        self.size = 25
         self.speed = 4
         self.frame = 0
         self.sprite_sheet = pygame.image.load("Images/TriangleSpaceshipSpritesheet.png").convert_alpha()
@@ -134,7 +134,7 @@ class SquareEnemy(Enemy):
         self.vertices = 4  # Square
         self.color = (0, 255, 0)  # Green color
         self.health = 4  # Health value for SquareEnemy
-        self.size = 20
+        self.size = 25
         self.speed = 3
         self.frame = 0
         self.sprite_sheet = pygame.image.load("Images/SmallSpaceshipSpritesheetHorizontal.png").convert_alpha()
@@ -162,7 +162,7 @@ class PentagonEnemy(Enemy):
         self.vertices = 5  # Pentagon
         self.color = (0, 0, 255)  # Blue color
         self.health = 5  # Health value for PentagonEnemy
-        self.size = 20
+        self.size = 25
         self.speed = 2
         self.frame = 0
         self.sprite_sheet = pygame.image.load("Images/SpaceshipRotatingSpritesheet.png").convert_alpha()
@@ -177,7 +177,7 @@ class PentagonEnemy(Enemy):
             y = self.y + radius * math.sin(angle)
             points.append((x, y))
         pygame.draw.polygon(screen, self.color, points)"""
-        pygame.draw.circle(screen, self.color, center=(self.x,self.y), radius=self.size)
+        #dddpygame.draw.circle(screen, self.color, center=(self.x,self.y), radius=self.size)
         vector_enemy_player = (self.player_instance.x - self.x, self.player_instance.y - self.y)
         if vector_enemy_player[0] < 0:
             vinkel = -math.degrees(math.atan(vector_enemy_player[1] / vector_enemy_player[0])) + 90

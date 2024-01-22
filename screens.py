@@ -9,6 +9,8 @@ class screenz:
         self.title_font = pygame.font.Font("pixelletters.ttf", 72)
         self.start_font = pygame.font.Font("pixelletters.ttf", 36)
         self.guide_font = pygame.font.Font("pixelletters.ttf", 30)
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
     def start_screen(self, screen):
         title_text = self.title_font.render('Battle of Geometry', True, WHITE)
         start_text = self.start_font.render('Press Any Key to Start', True, WHITE)
@@ -195,18 +197,21 @@ class screenz:
                         dropdown_open = False
                         screen_size_options = ["800x600", "1024x768", "1280x720", "1920x1080"]
                         if selected_size == screen_size_options[0]:
-                            settings.HEIGHT = 800
-                            settings.WIDTH = 600
+                            settings.WIDTH = 800
+                            settings.HEIGHT = 600
+                            self.screen = pygame.display.set_mode((settings.WIDTH, settings.HEIGHT))
                         elif selected_size == screen_size_options[1]:
-                            settings.HEIGHT = 1024
-                            settings.WIDTH = 768
-                            print(settings.HEIGHT)
+                            settings.WIDTH = 1024
+                            settings.HEIGHT = 768
+                            self.screen = pygame.display.set_mode((settings.WIDTH, settings.HEIGHT))
                         elif selected_size == screen_size_options[2]:
-                            settings.HEIGHT = 1280
-                            settings.WIDTH = 720
+                            settings.WIDTH = 1280
+                            settings.HEIGHT = 720
+                            self.screen = pygame.display.set_mode((settings.WIDTH, settings.HEIGHT))
                         elif selected_size == screen_size_options[3]:
-                            settings.HEIGHT = 1920
-                            settings.WIDTH = 1080
+                            settings.WIDTH = 1920
+                            settings.HEIGHT = 1080
+                            self.screen = pygame.display.set_mode((settings.WIDTH, settings.HEIGHT))
 
 
 
