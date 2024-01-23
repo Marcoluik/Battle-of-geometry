@@ -4,6 +4,7 @@ import random
 import player_file
 import xp_coins
 import screens
+import time
 
 from settings import WHITE, HEIGHT, WIDTH, BLACK
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
@@ -78,7 +79,7 @@ class Enemy:
 
 
 
-    def move_towards_player(self, player, enemies):
+    def move_towards_player(self, player, enemies, screen):
         # Adjusted movement to be more fluid
         self.player_instance = player
         dx = player.x - self.x
@@ -267,3 +268,73 @@ class HexagonEnemy(Enemy):
             y = self.y + radius * math.sin(angle)
             points.append((x, y))
         pygame.draw.polygon(screen, self.color, points)
+
+class TeslaCoil(Enemy):
+    def __init__(self):
+        super().__init__()
+        self.vertices = 1
+        self.health = 1
+        self.size = 30
+        self.speed = 2
+        self.frame = 0
+        self.shoot = False
+        self.beam_width = 5  # initial width of the beam
+        self.beam_color = (255, 0, 0)  # color of the beam, RGB red
+        self.beam_grow_speed = 5  # how fast the beam width grows
+        self.beam_move_speed = 20  # how fast the beam moves towards the player
+
+        self.start_time = time.time()
+        self.sprite_sheet = pygame.image.load("Images/TeslaCoilIdle.png").convert_alpha()
+        self.sprite_mask = pygame.mask.from_surface(get_image(self.sprite_sheet, math.floor(self.frame), 32, 32, 1, 0))
+
+        self.attack_sprite_sheet = pygame.image.load("Images/TeslaCoilAttack.png").convert_alpha()
+        self.attack_sprite_mask = pygame.mask.from_surface(get_image(self.attack_sprite_sheet, math.floor(self.frame), 32, 32, 2, 0))
+
+
+    def draw(self, screen):
+        current_time = time.time()
+        elapsed_time = current_time - self.start_time
+
+        # Check if 5 seconds have passed
+        if elapsed_time > 5:
+            # Use the attack sprite sheet and mask
+            sprite = get_image(self.attack_sprite_sheet, math.floor(self.frame), 32, 32, 2, 0)
+            self.sprite_mask = self.attack_sprite_mask
+            if self.frame >= 14:
+                self.shoot = True
+                self.frame = 0
+            else:
+                self.frame += 0.04
+        else:
+            # Use the idle sprite sheet and mask
+            sprite = get_image(self.sprite_sheet, math.floor(self.frame), 32, 32, 2, 0)
+            self.sprite_mask = pygame.mask.from_surface(sprite)
+
+
+        screen.blit(sprite, (self.x, self.y))
+    def move_towards_player(self, player, enemies, screen):
+        self.player_instance = player
+        Beamstartx = self.x
+        Beamstarty = self.y
+        Beamendx = player.x
+        beamendy = player.y
+
+        direction = pygame.math.Vector2(Beamendx - Beamstartx, beamendy - Beamstarty)
+        direction.normalize_ip()
+
+        # Update the beam's position and width
+        Beamstartx += direction.x * self.beam_move_speed
+        Beamstarty += direction.y * self.beam_move_speed
+
+        # Ensure coordinates are integers for drawing
+        Beamstartx_int = int(Beamstartx)
+        Beamstarty_int = int(Beamstarty)
+        Beamendx_int = int(Beamstartx + direction.x * self.beam_width)
+        Beamendy_int = int(Beamstarty + direction.y * self.beam_width)
+
+        # Draw the beam
+        pygame.draw.line(screen, self.beam_color, (Beamstartx_int, Beamstarty_int),
+                         (Beamendx_int, Beamendy_int), int(self.beam_width))
+
+
+

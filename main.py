@@ -106,7 +106,8 @@ while running:
         # Spawn enemies based on spawn_count
         for _ in range(spawn_count):
 
-            enemy_types = [enemy_file.TriangleEnemy, enemy_file.SquareEnemy, enemy_file.PentagonEnemy] #
+            #enemy_types = [enemy_file.TriangleEnemy, enemy_file.SquareEnemy, enemy_file.PentagonEnemy] #
+            enemy_types = [enemy_file.TeslaCoil]  #
             chosen_enemy_type = random.choice(enemy_types)
             enemies.append(chosen_enemy_type())
 
@@ -224,7 +225,7 @@ while running:
     for enemy in enemies[:]:
         # Check collision with projectiles
         if not frozen:
-            enemy.move_towards_player(player, enemies)
+            enemy.move_towards_player(player, enemies, screen)
             for projectile in projectiles[:]:
                 if projectile.sprite_mask.overlap(enemy.sprite_mask, (projectile.x-enemy.x-32, projectile.y-enemy.y-32)):
                     projectiles.remove(projectile)
