@@ -162,14 +162,16 @@ while running:
         if not frozen:
             enemy.move_towards_player(player, enemies)
             for projectile in projectiles[:]:
-                if projectile.collides_with(enemy):
+                if projectile.sprite_mask.overlap(enemy.sprite_mask, (projectile.x-enemy.x-32, projectile.y-enemy.y-32)):
                     projectiles.remove(projectile)
                     projectile_effects.append(projectile_file.ProjectileEffect(projectile.x, projectile.y))
                     if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
-                        explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x-32, enemy.y-32, 3)
+                        explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x - 32,
+                                                                        enemy.y - 32, 3)
                         explosions.append(explosion_effect)
                         enemies.remove(enemy)
                         break
+
         enemy.draw(screen)
 
     for projectile_effect in projectile_effects:

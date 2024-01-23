@@ -12,7 +12,7 @@ class Projectile:
         self.dy = dy
 
         self.image = pygame.image.load("Images/LaserSprite.png").convert_alpha()
-
+        self.sprite_mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def move(self):
