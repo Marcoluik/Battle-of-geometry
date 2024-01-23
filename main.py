@@ -54,6 +54,7 @@ pygame.mixer.music.play(2, 00.00, 50)
 
 
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
+circle_upgrade = player_file.CirclingUpgrade(WIDTH//2, HEIGHT//2)
 enemies = []
 projectiles = []
 player_coins = 0
@@ -145,6 +146,9 @@ while running:
         screen.blit(time_text, (WIDTH // 2, 70))
 
 
+    circle_upgrade.draw(screen)
+    circle_upgrade.update(current_time, player.x, player.y)
+
 
     move_items_towards_player(coins + experience_points, player)
 
@@ -233,12 +237,27 @@ while running:
                         enemy_death_sfx.play()
                         break
 
+            if circle_upgrade.sprite_mask.overlap(enemy.sprite_mask,
+                                                  (circle_upgrade.x - enemy.x - 32, circle_upgrade.y - enemy.y - 32)):
+                if enemy.take_damage(coins, experience_points, screen):
+                    explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x - 32,
+                                                                    enemy.y - 32, 3)
+                    explosions.append(explosion_effect)
+                    enemies.remove(enemy)
+                    enemy_death_sfx.play()
+                    break
+
         enemy.draw(screen)
 
     for projectile_effect in projectile_effects:
         projectile_effect.draw(screen)
         if projectile_effect.frame > 10:
             projectile_effects.remove(projectile_effect)
+
+
+
+
+
 
     for explosion_effect in explosions[:]:
         explosion_effect.update()
