@@ -150,7 +150,7 @@ class CirclingUpgrade:
         self.radius = 25
         self.color = (255, 255, 255)
 
-        self.image = pygame.image.load("asteroid_circle.png")
+        self.image = pygame.image.load("Images/asteroid_circle.png")
         self.image = pygame.transform.scale(self.image, (64, 64))
 
 
@@ -163,8 +163,8 @@ class CirclingUpgrade:
         screen.blit(rotated_image, self.rect)
 
     def update(self, current_time, player_x, player_y):
-        new_x = player_x + 100 * math.cos(current_time / 175)
-        new_y = player_y + 100 * math.sin(current_time / 175)
+        new_x = player_x + 100 * math.cos(current_time / 500)
+        new_y = player_y + 100 * math.sin(current_time / 500)
 
         # Update player's position
         self.x = new_x

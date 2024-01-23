@@ -16,7 +16,7 @@ class screenz:
         title_text = self.title_font.render('Battle of Geometry', True, WHITE)
         start_text = self.start_font.render('Press Any Key to Start', True, WHITE)
         guide_text = self.guide_font.render('WASD to move, shoot with left click, aim with mouse, dash on space', True, WHITE)
-        iconsettings = pygame.image.load("settingsicon.png")
+        iconsettings = pygame.image.load("Images/settingsicon.png")
         iconsettings = pygame.transform.scale(iconsettings, (50, 50))
 
         button_x = WIDTH//20
@@ -126,7 +126,7 @@ class screenz:
         dropdown_open = False
         selected_size = screen_size_options[0]
 
-        back = pygame.image.load("back.png")
+        back = pygame.image.load("Images/back.png")
         back = pygame.transform.scale(back, (50, 50))
 
 

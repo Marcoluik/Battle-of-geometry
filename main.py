@@ -33,11 +33,11 @@ running = True
 
 
 #sound effects
-shooting_sfx = pygame.mixer.Sound("laserpew.ogg")
-game_over_sfx = pygame.mixer.Sound("gameoversound.ogg")
-damage_taken_sfx = pygame.mixer.Sound('spawn.ogg')
-enemy_death_sfx = pygame.mixer.Sound('explosion01.ogg')
-coin_pickup_sfx = pygame.mixer.Sound('1_Coins.ogg')
+shooting_sfx = pygame.mixer.Sound("sounds/laserpew.ogg")
+game_over_sfx = pygame.mixer.Sound("sounds/gameoversound.ogg")
+damage_taken_sfx = pygame.mixer.Sound('sounds/spawn.ogg')
+enemy_death_sfx = pygame.mixer.Sound('sounds/explosion01.ogg')
+coin_pickup_sfx = pygame.mixer.Sound('sounds/1_Coins.ogg')
 
 
 #sound effects adjusting volumes
@@ -47,7 +47,7 @@ damage_taken_sfx.set_volume(0.1)
 enemy_death_sfx.set_volume(0.05)
 coin_pickup_sfx.set_volume(0.2)
 
-pygame.mixer.music.load('Space-Sprinkles.ogg')
+pygame.mixer.music.load('sounds/Space-Sprinkles.ogg')
 pygame.mixer.music.set_volume(0.06)
 pygame.mixer.music.play(2, 00.00, 50)
 
@@ -230,7 +230,7 @@ while running:
                     projectiles.remove(projectile)
                     projectile_effects.append(projectile_file.ProjectileEffect(projectile.x, projectile.y))
                     if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
-                        explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x - 32,
+                        explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32,
                                                                         enemy.y - 32, 3)
                         explosions.append(explosion_effect)
                         enemies.remove(enemy)
@@ -240,7 +240,7 @@ while running:
             if circle_upgrade.sprite_mask.overlap(enemy.sprite_mask,
                                                   (circle_upgrade.x - enemy.x - 32, circle_upgrade.y - enemy.y - 32)):
                 if enemy.take_damage(coins, experience_points, screen):
-                    explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x - 32,
+                    explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32,
                                                                     enemy.y - 32, 3)
                     explosions.append(explosion_effect)
                     enemies.remove(enemy)
