@@ -1,6 +1,9 @@
 import pygame
 import screens
 from settings import WHITE, HEIGHT, WIDTH, BLACK
+import math
+
+clock = pygame.time.Clock()
 
 class Player:
     def __init__(self, x, y):
@@ -137,3 +140,43 @@ class Player:
             if new_alpha > 0:
                 new_trail.append((pos, new_alpha))
         self.dash_trail = new_trail
+
+class CirclingUpgrade:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+        self.speed = 1
+        self.radius = 25
+        self.color = (255, 255, 255)
+
+        self.image = pygame.image.load("asteroid_circle.png")
+        self.image = pygame.transform.scale(self.image, (64, 64))
+
+
+        self.sprite_mask = pygame.mask.from_surface(self.image)
+        self.angle = 0  # Initial rotation angle
+
+    def draw(self, screen):
+        rotated_image = pygame.transform.rotate(self.image, self.angle)
+        self.rect = rotated_image.get_rect(center=(self.x, self.y))
+        screen.blit(rotated_image, self.rect)
+
+    def update(self, current_time, player_x, player_y):
+        new_x = player_x + 100 * math.cos(current_time / 175)
+        new_y = player_y + 100 * math.sin(current_time / 175)
+
+        # Update player's position
+        self.x = new_x
+        self.y = new_y
+
+        # Update rotation angle
+        self.angle += 4  # You can adjust the rotation speed by changing this value
+
+        # Keep the angle within 360 degrees
+        if self.angle >= 360:
+            self.angle = 0
+
+    def collides_with(self, other):
+        return (self.x < other.x + other.size and self.x + self.radius > other.x and
+                self.y < other.y + other.size and self.y + self.radius > other.y)

@@ -54,6 +54,7 @@ pygame.mixer.music.play(2, 00.00, 50)
 
 
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
+circle_upgrade = player_file.CirclingUpgrade(WIDTH//2, HEIGHT//2)
 enemies = []
 projectiles = []
 player_coins = 0
@@ -123,6 +124,9 @@ while running:
     player.update(current_time)
     # Update game state
     tiles.update()
+
+    circle_upgrade.draw(screen)
+    circle_upgrade.update(current_time, player.x, player.y)
 
 
     move_items_towards_player(coins + experience_points, player)
@@ -201,6 +205,11 @@ while running:
                     enemies.remove(enemy)
                     enemy_death_sfx.play()
                     break
+
+
+
+
+
 
     for explosion_effect in explosions[:]:
         explosion_effect.update()
