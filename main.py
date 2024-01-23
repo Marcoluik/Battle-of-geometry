@@ -85,7 +85,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN and not frozen:
+        #elif event.type == pygame.MOUSEBUTTONDOWN and not frozen:
+        elif event.type and not frozen:
             # Shoot a projectile
             print(pygame.time.get_ticks(), frozen)
             mx, my = pygame.mouse.get_pos()
