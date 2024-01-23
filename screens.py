@@ -12,6 +12,7 @@ class screenz:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     def start_screen(self, screen):
+        pygame.mouse.set_cursor(pygame.cursors.arrow)
         title_text = self.title_font.render('Battle of Geometry', True, WHITE)
         start_text = self.start_font.render('Press Any Key to Start', True, WHITE)
         guide_text = self.guide_font.render('WASD to move, shoot with left click, aim with mouse, dash on space', True, WHITE)
@@ -49,6 +50,7 @@ class screenz:
 
 
     def game_over_screen(self, screen, coins_collected):
+        pygame.mouse.set_cursor(pygame.cursors.arrow)
         game_over_font = pygame.font.Font("pixelletters.ttf", 72)
         coins_font = pygame.font.Font("pixelletters.ttf", 50)
         try_again_font = pygame.font.Font("pixelletters.ttf", 50)
@@ -94,10 +96,10 @@ class screenz:
             pygame.draw.rect(screen, WHITE, (back_button_x, back_button_y, button_width, button_height))
             screen.blit(back_to_start_text, (back_button_x + 10, back_button_y))
             pygame.display.flip()
-            clock.tick(30)
 
     def settings_screen(self, screen):
         pygame.init()
+        pygame.mouse.set_cursor(pygame.cursors.arrow)
 
         # Colors
         WHITE = (255, 255, 255)

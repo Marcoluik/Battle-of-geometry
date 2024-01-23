@@ -17,8 +17,8 @@ pygame.init()
 
 # Set up the display
 pygame.display.set_caption("Battle of geometry")
-enemy_spawn_time = 2  # Timer for enemy spawning
-spawn_interval = 5000  # 10 seconds in milliseconds
+enemy_spawn_time = 2  # Timer til enemies spawner i starten af spillet
+spawn_interval = 5000
 spawn_count = 2  # Initial number of enemies to spawn
 # Define colors
 
@@ -40,6 +40,9 @@ player_experience = 0
 experience_points = []
 tiles = tile_file.Tiles()
 explosions = []
+projectile_effects = []
+frozen = False
+frozen_timer = 0
 
 screen_manager = screens.screenz()
 screen = screen_manager.screen
@@ -52,8 +55,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and not frozen:
             # Shoot a projectile
+            print(pygame.time.get_ticks(), frozen)
             mx, my = pygame.mouse.get_pos()
             dx, dy = mx - player.x, my - player.y
             distance = (dx ** 2 + dy ** 2) ** 0.5
@@ -80,20 +84,21 @@ while running:
 
     # Player movement
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_SPACE]:
+    if keys[pygame.K_SPACE] and not frozen:
         player.dash(current_time)
-    if keys[pygame.K_a]:
+    if keys[pygame.K_a] and not frozen:
         player.move(-1, 0)
-    if keys[pygame.K_d]:
+    if keys[pygame.K_d] and not frozen:
         player.move(1, 0)
-    if keys[pygame.K_w]:
+    if keys[pygame.K_w] and not frozen:
         player.move(0, -1)
-    if keys[pygame.K_s]:
+    if keys[pygame.K_s] and not frozen:
         player.move(0, 1)
 
     # Update and draw player
+    if not frozen:
+        player.update(current_time)
     player.draw(screen)
-    player.update(current_time)
     # Update game state
     tiles.update()
 
@@ -117,7 +122,10 @@ while running:
 
     if player_experience >= 20:
         player_experience -= 20  # Deduct exp after upgrading
+        frozen = True
         upgrade = upgrade_window(screen, player_experience)
+        frozen_timer = pygame.time.get_ticks() + 700
+        print(frozen, frozen_timer)
         if upgrade == 1:
             projectile.size += 1
         elif upgrade == 2:
@@ -133,28 +141,41 @@ while running:
     health_text = font.render(f"Health: {player.health}", True, WHITE)
     screen.blit(health_text, (10, 70))  # Position below the coin count
 
+    if pygame.time.get_ticks() > frozen_timer and frozen:
+        frozen = False
+        print(pygame.time.get_ticks())
 
-    # Update and draw enemies
+    # Update and draw projectiles
     for projectile in projectiles[:]:
-        projectile.move()
+        if not frozen:
+            projectile.move()
+            if projectile.x < 0 or projectile.x > WIDTH or projectile.y < 0 or projectile.y > HEIGHT:
+                projectiles.remove(projectile)
         projectile.draw(screen)
-        if projectile.x < 0 or projectile.x > WIDTH or projectile.y < 0 or projectile.y > HEIGHT:
-            projectiles.remove(projectile)
+
+
+
 
         # Update and draw enemies
     for enemy in enemies[:]:
-        enemy.move_towards_player(player, enemies)
+        # Check collision with projectiles
+        if not frozen:
+            enemy.move_towards_player(player, enemies)
+            for projectile in projectiles[:]:
+                if projectile.collides_with(enemy):
+                    projectiles.remove(projectile)
+                    projectile_effects.append(projectile_file.ProjectileEffect(projectile.x, projectile.y))
+                    if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
+                        explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x-32, enemy.y-32, 3)
+                        explosions.append(explosion_effect)
+                        enemies.remove(enemy)
+                        break
         enemy.draw(screen)
 
-        # Check collision with projectiles
-        for projectile in projectiles[:]:
-            if projectile.collides_with(enemy):
-                projectiles.remove(projectile)
-                if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
-                    explosion_effect = enemy_file.ParticleAnimation('explosion.png', 1, 8, screen, enemy.x-32, enemy.y-32, 3)
-                    explosions.append(explosion_effect)
-                    enemies.remove(enemy)
-                    break
+    for projectile_effect in projectile_effects:
+        projectile_effect.draw(screen)
+        if projectile_effect.frame > 10:
+            projectile_effects.remove(projectile_effect)
 
     for explosion_effect in explosions[:]:
         explosion_effect.update()
@@ -174,16 +195,16 @@ while running:
             if player.health <= 0:
                 print("Player has died!")
                 running = False
-                screen_manager.game_over_screen(screen, player_coins)  # Display game over screen
+                screen_manager.game_over_screen(screen, player_coins)  # Display game_over_screen
                 # Reset game state for a new game
                 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
                 enemies=[]
                 projectiles = []
                 player_coins = 0
                 coins = []
-                player_experience
+                player_experience = 0
                 experience_points = []
-                enemy_spawn_time = 0
+                enemy_spawn_time = pygame.time.get_ticks()
                 spawn_count = 2
                 running = True
     pygame.display.flip()

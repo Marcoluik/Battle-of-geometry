@@ -32,3 +32,17 @@ class Projectile:
     def collides_with(self, other):
         return (self.x < other.x + other.size and self.x + self.size > other.x and
                 self.y < other.y + other.size and self.y + self.size > other.y)
+
+class ProjectileEffect():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.frame = 0
+        self.radius = 1
+
+    def draw(self, screen):
+        self.radius = 20/(1+5*math.e**(-0.01*20*self.frame))+2
+        pygame.draw.circle(screen, center=(self.x, self.y), color=(255, 0, 0), radius=self.radius)
+        pygame.draw.circle(screen, center=(self.x, self.y), color=(255, 255, 255), radius=self.radius-2)
+        self.frame += 1
+
