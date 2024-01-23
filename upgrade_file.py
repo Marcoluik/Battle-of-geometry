@@ -6,7 +6,7 @@ from settings import WHITE, HEIGHT, WIDTH, BLACK
 WHITE = (255, 255, 255)
 BLACK = (0, 0 ,0)
 clock = pygame.time.Clock()
-def upgrade_window(screen, experience):
+def upgrade_window(screen):
     upgrade_font = pygame.font.Font("pixelletters.ttf", 36)
 
     upgrade_text = upgrade_font.render('Choose an Upgrade', True, WHITE)

@@ -62,6 +62,8 @@ player_experience = 0
 experience_points = []
 tiles = tile_file.Tiles()
 explosions = []
+game_time = 0
+
 
 screen_manager = screens.screenz()
 screen = screen_manager.screen
@@ -72,6 +74,10 @@ while running:
     pygame.mouse.set_cursor(pygame.cursors.broken_x)
     current_time = pygame.time.get_ticks()
     dt = clock.tick()
+    game_time = current_time // 1000  # integer division
+    gt_minutes = game_time // 60
+    gt_seconds = game_time % 60
+
 
 
     for event in pygame.event.get():
@@ -123,6 +129,16 @@ while running:
     player.update(current_time)
     # Update game state
     tiles.update()
+    if gt_minutes < 10 and gt_seconds < 10:
+        time_text = font.render(f"0{gt_minutes} : 0{gt_seconds}", True, WHITE)
+        screen.blit(time_text, (WIDTH // 2, 70))
+    elif gt_minutes < 10:
+        time_text = font.render(f"0{gt_minutes} : {gt_seconds}", True, WHITE)
+        screen.blit(time_text, (WIDTH // 2, 70))
+    else:
+        time_text = font.render(f"{gt_minutes} : {gt_seconds}", True, WHITE)
+        screen.blit(time_text, (WIDTH // 2, 70))
+
 
 
     move_items_towards_player(coins + experience_points, player)
@@ -172,7 +188,7 @@ while running:
     if player_experience >= next_lvl:
         player_experience -= next_lvl  # Deduct exp after upgrading
         next_lvl *= 2
-        upgrade = upgrade_window(screen, player_experience)
+        upgrade = upgrade_window(screen)
         if upgrade == 1:
             player.speed += 2
         elif upgrade == 2:
@@ -185,7 +201,6 @@ while running:
             player.dash_cooldown -= 500
         elif upgrade == 6:
             player.shoot_cd -= 150
-
         # Update and draw enemies
     for enemy in enemies[:]:
         enemy.move_towards_player(player, enemies)
