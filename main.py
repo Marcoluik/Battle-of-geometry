@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import events
 import screens
 import player_file
 import xp_coins
@@ -55,6 +56,12 @@ pygame.mixer.music.play(2, 00.00, 50)
 
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
 circle_upgrade = player_file.CirclingUpgrade(WIDTH//2, HEIGHT//2)
+
+meteors = []
+for _ in range(15):
+    meteor_event = events.MeteorEvent(WIDTH - random.randint(10, 500), -random.randint(50, 600))
+    meteors.append(meteor_event)
+
 enemies = []
 projectiles = []
 player_coins = 0
@@ -254,6 +261,50 @@ while running:
         if projectile_effect.frame > 10:
             projectile_effects.remove(projectile_effect)
 
+    #METEOR EVENT
+    if (current_time > 55000 and current_time < 60000):
+        meteor_warning_text = font.render("WARNING: METEOR SHOWER INCOMING", True, WHITE)
+        screen.blit(meteor_warning_text, (WIDTH//2, HEIGHT//2 - 100))
+    if (current_time > 60000 and current_time < 70000):
+
+
+        for meteor in meteors:
+            meteor.draw(screen)
+            meteor.update()
+
+            for enemy in enemies[:]:
+                if meteor.sprite_mask.overlap(enemy.sprite_mask, (meteor.x-enemy.x-32, meteor.y-enemy.y-32)):
+                    meteors.remove(meteor)
+                    if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
+                        explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32, enemy.y - 32, 3)
+                        explosions.append(explosion_effect)
+                        enemies.remove(enemy)
+                        enemy_death_sfx.play()
+                        break
+
+            if player.collides_with(meteor):
+                player.health -= 1
+                meteors.remove(meteor)
+
+                if player.health > 0:
+                    damage_taken_sfx.play()
+
+                if player.health <= 0:
+                    print("Player has died!")
+                    game_over_sfx.play()
+                    running = False
+                    screen_manager.game_over_screen(screen, player_coins)  # Display game_over_screen
+                    # Reset game state for a new game
+                    player = player_file.Player(WIDTH // 2, HEIGHT // 2)
+                    enemies = []
+                    projectiles = []
+                    player_coins = 0
+                    coins = []
+                    player_experience = 0
+                    experience_points = []
+                    enemy_spawn_time = pygame.time.get_ticks()
+                    spawn_count = 2
+                    running = True
 
 
 
