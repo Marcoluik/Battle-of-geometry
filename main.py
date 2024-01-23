@@ -83,7 +83,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        #elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type:
             # Shoot a projectile
             mx, my = pygame.mouse.get_pos()
             dx, dy = mx - player.x, my - player.y
