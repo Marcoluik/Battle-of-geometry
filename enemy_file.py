@@ -75,7 +75,8 @@ class Enemy:
         self.avoidance_radius = 20  # Radius for collision avoidance
 
 
-
+    def update(self):
+        pass
 
 
     def move_towards_player(self, player, enemies):

@@ -1,19 +1,23 @@
 import pygame
 import math
 from settings import WHITE, HEIGHT, WIDTH, BLACK
+
+def get_image(sheet, frame, width, height, scale, angle):
+    image = pygame.Surface((width, height)).convert_alpha()
+    image.blit(sheet, (0,0), ((frame*width), 0, width, height))
+    image = pygame.transform.scale(image, (width*scale, height*scale))
+    image = pygame.transform.rotate(image, angle)
+    image.set_colorkey((0, 0, 0))
+
+    return image
+
 class Projectile:
     def __init__(self, x, y, dx, dy):
         self.x = x
         self.y = y
-        self.size = 5
         self.color = (255, 255, 0)
-        self.speed = 10
         self.dx = dx
         self.dy = dy
-
-        self.image = pygame.image.load("Images/LaserSprite.png").convert_alpha()
-        self.sprite_mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def move(self):
         self.x += self.dx * self.speed
@@ -32,6 +36,42 @@ class Projectile:
     def collides_with(self, other):
         return (self.x < other.x + other.size and self.x + self.size > other.x and
                 self.y < other.y + other.size and self.y + self.size > other.y)
+
+class Laser_Projectile(Projectile):
+    def __init__(self, x, y, dx, dy):
+        super(Laser_Projectile, self).__init__(x, y, dx, dy)
+        self.size = 5
+        self.speed = 10
+
+        self.frame = 0
+        #self.sprite_sheet = pygame.image.load("Images/LaserSprite.png").convert_alpha()
+        self.angle = math.degrees(math.atan2(-self.dy, self.dx))+90
+        self.image = pygame.image.load("Images/LaserSprite.png").convert_alpha()
+
+        self.sprite_mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+class Rotating_Enemy_Projectile(Projectile):
+    def __init__(self, x, y, dx, dy):
+        super(Rotating_Enemy_Projectile, self).__init__(x, y, dx, dy)
+        self.size = 7
+        self.speed = 10
+
+        self.frame = 0
+        self.sprite_sheet = pygame.image.load("Images/LaserSprite.png").convert_alpha()
+        self.angle = math.degrees(math.atan2(-self.dy, self.dx)) + 90
+        self.image = get_image(self.sprite_sheet, self.frame, 32, 32, 2, self.angle)
+
+        self.sprite_mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+    def draw(self, screen):
+        screen.blit(self.rotated_image, self.rect)
+        if self.frame >= 3:
+            self.frame = 0
+        else:
+            self.frame += 0.4
+        self.image = get_image(self.sprite_sheet, self.frame, 32, 32, 2, self.angle)
 
 class ProjectileEffect():
     def __init__(self, x, y):

@@ -89,15 +89,15 @@ while running:
         #elif event.type == pygame.MOUSEBUTTONDOWN and not frozen:
         elif event.type and not frozen:
             # Shoot a projectile
-            print(pygame.time.get_ticks(), frozen)
-            mx, my = pygame.mouse.get_pos()
+            pass
+            """mx, my = pygame.mouse.get_pos()
             dx, dy = mx - player.x, my - player.y
             distance = (dx ** 2 + dy ** 2) ** 0.5
             if distance != 0 and current_time - player.last_shot > player.shoot_cd:
                 dx, dy = dx / distance, dy / distance
                 shooting_sfx.play()
                 projectiles.append(projectile_file.Projectile(player.x, player.y, dx, dy))
-                player.last_shot = current_time  # Update the time when the player last shot
+                player.last_shot = current_time  # Update the time when the player last shot"""
     for tile_data in tiles.current_moon_tiles + tiles.next_moon_tiles:
         pygame.draw.rect(screen, tile_data["color"], tile_data["rect"])
     if pygame.time.get_ticks() - enemy_spawn_time > spawn_interval:
@@ -114,7 +114,15 @@ while running:
         if spawn_count < 8:
             spawn_count = int(spawn_count ** 1.3)
 
-
+    if not frozen:
+        mx, my = pygame.mouse.get_pos()
+        dx, dy = mx - player.x, my - player.y
+        distance = (dx ** 2 + dy ** 2) ** 0.5
+        if distance != 0 and current_time - player.last_shot > player.shoot_cd:
+            dx, dy = dx / distance, dy / distance
+            shooting_sfx.play()
+            projectiles.append(projectile_file.Laser_Projectile(player.x, player.y, dx, dy))
+            player.last_shot = current_time  # Update the time when the player last shot
 
     # Player movement
     keys = pygame.key.get_pressed()
@@ -188,7 +196,6 @@ while running:
 
     if pygame.time.get_ticks() > frozen_timer and frozen:
         frozen = False
-        print(pygame.time.get_ticks())
 
     # Update and draw projectiles
     for projectile in projectiles[:]:
@@ -233,6 +240,11 @@ while running:
                         explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32,
                                                                         enemy.y - 32, 3)
                         explosions.append(explosion_effect)
+                        if enemy.vertices == 5:
+                            dx, dy = player.x - enemy.x, player.y - enemy.y
+                            distance = (dx ** 2 + dy ** 2) ** 0.5
+                            dx, dy = dx/distance, dy/distance
+                            projectiles.append(projectile_file.Rotating_Enemy_Projectile(enemy.x+100, enemy.y+100, dx, dy))
                         enemies.remove(enemy)
                         enemy_death_sfx.play()
                         break
