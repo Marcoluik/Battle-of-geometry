@@ -80,9 +80,9 @@ screen = screen_manager.screen
 screen_manager.start_screen(screen)
 
 last_reset = 0
-
+add_to_spawn_count = spawn_count
 while running:
-    print(last_reset)
+
     screen.fill(BLACK)
     pygame.mouse.set_cursor(pygame.cursors.broken_x)
     current_time = pygame.time.get_ticks() - last_reset
@@ -121,7 +121,8 @@ while running:
 
         # Increase the spawn count following the power of 1.5 rule
         if spawn_count < 8:
-            spawn_count = int(spawn_count ** 1.3)
+            add_to_spawn_count *= 1.05
+            spawn_count = int(add_to_spawn_count)
 
 
 

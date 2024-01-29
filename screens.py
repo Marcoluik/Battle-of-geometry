@@ -11,7 +11,6 @@ class screenz:
         self.guide_font = pygame.font.Font("pixelletters.ttf", 30)
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-
     def start_screen(self, screen):
         pygame.mouse.set_cursor(pygame.cursors.arrow)
         title_text = self.title_font.render('Battle of Geometry', True, WHITE)
