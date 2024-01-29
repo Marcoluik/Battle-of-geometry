@@ -16,6 +16,9 @@ class MeteorEvent:
 
         self.sprite_mask = pygame.mask.from_surface(self.image)
         self.angle = 0  # Initial rotation angle
+    def reset(self, x, y):
+        self.x = x
+        self.y = y
 
     def draw(self, screen):
         rotated_image = pygame.transform.rotate(self.image, self.angle)

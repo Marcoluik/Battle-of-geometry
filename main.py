@@ -79,10 +79,13 @@ screen_manager = screens.screenz()
 screen = screen_manager.screen
 screen_manager.start_screen(screen)
 
+last_reset = 0
+
 while running:
+    print(last_reset)
     screen.fill(BLACK)
     pygame.mouse.set_cursor(pygame.cursors.broken_x)
-    current_time = pygame.time.get_ticks()
+    current_time = pygame.time.get_ticks() - last_reset
     dt = clock.tick()
     game_time = current_time // 1000  # integer division
     gt_minutes = game_time // 60
@@ -96,7 +99,6 @@ while running:
         #elif event.type == pygame.MOUSEBUTTONDOWN and not frozen:
         elif event.type and not frozen:
             # Shoot a projectile
-            print(pygame.time.get_ticks(), frozen)
             mx, my = pygame.mouse.get_pos()
             dx, dy = mx - player.x, my - player.y
             distance = (dx ** 2 + dy ** 2) ** 0.5
@@ -262,12 +264,16 @@ while running:
             projectile_effects.remove(projectile_effect)
 
     #METEOR EVENT
-    if (current_time > 55000 and current_time < 60000):
+    if (current_time > 55000 and current_time < 60000) or (current_time > 115000 and current_time < 120000):
         meteor_warning_text = font.render("WARNING: METEOR SHOWER INCOMING", True, WHITE)
         screen.blit(meteor_warning_text, (WIDTH//2, HEIGHT//2 - 100))
-    if (current_time > 60000 and current_time < 70000):
 
+    if (current_time > 70000 and current_time < 71000) or (current_time > 130000 and current_time < 131000):
+        for meteor in meteors:
+            meteor.reset(WIDTH - random.randint(10, 500), -random.randint(50, 600))
+            print(meteor.x, meteor.y)
 
+    if (current_time > 60000 and current_time < 70000) or (current_time > 120000 and current_time < 130000):
         for meteor in meteors:
             meteor.draw(screen)
             meteor.update()
@@ -293,6 +299,7 @@ while running:
                     print("Player has died!")
                     game_over_sfx.play()
                     running = False
+                    last_reset = pygame.time.get_ticks()
                     screen_manager.game_over_screen(screen, player_coins)  # Display game_over_screen
                     # Reset game state for a new game
                     player = player_file.Player(WIDTH // 2, HEIGHT // 2)
@@ -302,6 +309,7 @@ while running:
                     coins = []
                     player_experience = 0
                     experience_points = []
+                    next_lvl = 20
                     enemy_spawn_time = pygame.time.get_ticks()
                     spawn_count = 2
                     running = True
@@ -332,6 +340,7 @@ while running:
                 print("Player has died!")
                 game_over_sfx.play()
                 running = False
+                last_reset = pygame.time.get_ticks()
                 screen_manager.game_over_screen(screen, player_coins)  # Display game_over_screen
                 # Reset game state for a new game
                 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
@@ -341,6 +350,7 @@ while running:
                 coins = []
                 player_experience = 0
                 experience_points = []
+                next_lvl = 20
                 enemy_spawn_time = pygame.time.get_ticks()
                 spawn_count = 2
                 running = True
