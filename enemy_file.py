@@ -219,6 +219,7 @@ class PentagonEnemy(Enemy):
         self.size = 30
         self.speed = 2
         self.frame = 0
+        self.vinkel = 0
         self.sprite_sheet = pygame.image.load("Images/SpaceshipRotatingSpritesheet.png").convert_alpha()
         self.sprite_mask = pygame.mask.from_surface(get_image(self.sprite_sheet, math.floor(self.frame), 32, 32, 2, 0))
 
@@ -235,10 +236,10 @@ class PentagonEnemy(Enemy):
         try:
             vector_enemy_player = (self.player_instance.x - self.x, self.player_instance.y - self.y)
             if vector_enemy_player[0] < 0:
-                vinkel = -math.degrees(math.atan(vector_enemy_player[1] / vector_enemy_player[0])) + 90
+                self.vinkel = -math.degrees(math.atan(vector_enemy_player[1] / vector_enemy_player[0])) + 90
             else:
-                vinkel = -math.degrees(math.atan(vector_enemy_player[1] / vector_enemy_player[0])) - 90
-            sprite = get_image(self.sprite_sheet, math.floor(self.frame), 32, 32, 2, vinkel)
+                self.vinkel = -math.degrees(math.atan(vector_enemy_player[1] / vector_enemy_player[0])) - 90
+            sprite = get_image(self.sprite_sheet, math.floor(self.frame), 32, 32, 2, self.vinkel)
             self.sprite_mask = pygame.mask.from_surface(sprite)
         except:
             sprite = get_image(self.sprite_sheet, math.floor(self.frame), 32, 32, 2, 0)

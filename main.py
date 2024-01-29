@@ -203,6 +203,28 @@ while running:
             projectile.move()
             if projectile.x < 0 or projectile.x > WIDTH or projectile.y < 0 or projectile.y > HEIGHT:
                 projectiles.remove(projectile)
+            if projectile.size == 4 and player.collides_with(projectile):
+                projectiles.remove(projectile)
+                player.health -= 1
+                if player.health > 0:
+                    damage_taken_sfx.play()
+                if player.health <= 0:
+                    print("Player has died!")
+                    game_over_sfx.play()
+                    running = False
+                    screen_manager.game_over_screen(screen, player_coins)  # Display game_over_screen
+                    # Reset game state for a new game
+                    player = player_file.Player(WIDTH // 2, HEIGHT // 2)
+                    enemies = []
+                    projectiles = []
+                    player_coins = 0
+                    coins = []
+                    player_experience = 0
+                    experience_points = []
+                    enemy_spawn_time = pygame.time.get_ticks()
+                    spawn_count = 2
+                    running = True
+
         projectile.draw(screen)
 
 
@@ -233,7 +255,7 @@ while running:
         if not frozen:
             enemy.move_towards_player(player, enemies)
             for projectile in projectiles[:]:
-                if projectile.sprite_mask.overlap(enemy.sprite_mask, (projectile.x-enemy.x-32, projectile.y-enemy.y-32)):
+                if projectile.size != 4 and projectile.sprite_mask.overlap(enemy.sprite_mask, (projectile.x-enemy.x-32, projectile.y-enemy.y-32)):
                     projectiles.remove(projectile)
                     projectile_effects.append(projectile_file.ProjectileEffect(projectile.x, projectile.y))
                     if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
@@ -244,12 +266,12 @@ while running:
                             dx, dy = player.x - enemy.x, player.y - enemy.y
                             distance = (dx ** 2 + dy ** 2) ** 0.5
                             dx, dy = dx/distance, dy/distance
-                            projectiles.append(projectile_file.Rotating_Enemy_Projectile(enemy.x+100, enemy.y+100, dx, dy))
+                            projectiles.append(projectile_file.Rotating_Enemy_Projectile(enemy.x, enemy.y, dx, dy, enemy.vinkel))
                         enemies.remove(enemy)
                         enemy_death_sfx.play()
                         break
 
-            if circle_upgrade.sprite_mask.overlap(enemy.sprite_mask,
+            if enemy in enemies and circle_upgrade.sprite_mask.overlap(enemy.sprite_mask,
                                                   (circle_upgrade.x - enemy.x - 32, circle_upgrade.y - enemy.y - 32)):
                 if enemy.take_damage(coins, experience_points, screen):
                     explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32,
@@ -265,11 +287,6 @@ while running:
         projectile_effect.draw(screen)
         if projectile_effect.frame > 10:
             projectile_effects.remove(projectile_effect)
-
-
-
-
-
 
     for explosion_effect in explosions[:]:
         explosion_effect.update()

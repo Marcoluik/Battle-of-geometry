@@ -3,11 +3,12 @@ import math
 from settings import WHITE, HEIGHT, WIDTH, BLACK
 
 def get_image(sheet, frame, width, height, scale, angle):
-    image = pygame.Surface((width, height)).convert_alpha()
+    image = pygame.Surface((width, height))
     image.blit(sheet, (0,0), ((frame*width), 0, width, height))
     image = pygame.transform.scale(image, (width*scale, height*scale))
     image = pygame.transform.rotate(image, angle)
     image.set_colorkey((0, 0, 0))
+
 
     return image
 
@@ -40,7 +41,7 @@ class Projectile:
 class Laser_Projectile(Projectile):
     def __init__(self, x, y, dx, dy):
         super(Laser_Projectile, self).__init__(x, y, dx, dy)
-        self.size = 5
+        self.size = 3
         self.speed = 10
 
         self.frame = 0
@@ -52,14 +53,14 @@ class Laser_Projectile(Projectile):
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
 class Rotating_Enemy_Projectile(Projectile):
-    def __init__(self, x, y, dx, dy):
+    def __init__(self, x, y, dx, dy, vinkel):
         super(Rotating_Enemy_Projectile, self).__init__(x, y, dx, dy)
-        self.size = 7
+        self.size = 4
         self.speed = 10
 
-        self.frame = 0
-        self.sprite_sheet = pygame.image.load("Images/LaserSprite.png").convert_alpha()
-        self.angle = math.degrees(math.atan2(-self.dy, self.dx)) + 90
+        self.frame = 2
+        self.sprite_sheet = pygame.image.load("Images/RotatingProjectileEnemy.png").convert_alpha()
+        self.angle = vinkel+90
         self.image = get_image(self.sprite_sheet, self.frame, 32, 32, 2, self.angle)
 
         self.sprite_mask = pygame.mask.from_surface(self.image)
@@ -70,8 +71,8 @@ class Rotating_Enemy_Projectile(Projectile):
         if self.frame >= 3:
             self.frame = 0
         else:
-            self.frame += 0.4
-        self.image = get_image(self.sprite_sheet, self.frame, 32, 32, 2, self.angle)
+            self.frame += 1
+        self.image = get_image(self.sprite_sheet, math.floor(self.frame), 32, 32, 3, self.angle)
 
 class ProjectileEffect():
     def __init__(self, x, y):
