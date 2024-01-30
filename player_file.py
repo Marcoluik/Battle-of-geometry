@@ -5,6 +5,15 @@ import math
 
 clock = pygame.time.Clock()
 
+def get_image(sheet, frame, width, height, scale, angle):
+    image = pygame.Surface((width, height))
+    image.blit(sheet, (0,0), ((frame*width), 0, width, height))
+    image = pygame.transform.scale(image, (width*scale, height*scale))
+    image = pygame.transform.rotate(image, angle)
+    image.set_colorkey((0, 0, 0))
+
+    return image
+
 class Player:
     def __init__(self, x, y):
         self.x = x
@@ -24,6 +33,9 @@ class Player:
         self.attackdmg = 1
         self.shoot_cd = 500
         self.last_shot = 0
+        self.frame = 0
+
+        self.spritesheet = pygame.image.load("Images/Player-spritesheet.png")
 
     def draw(self, screen):
         # Draw the dash trail
@@ -33,9 +45,17 @@ class Player:
             pygame.draw.circle(trail_surface, trail_color, (self.size // 2, self.size // 2), self.size // 2.3)
             screen.blit(trail_surface, pos)
 
+
         # Draw the player
-        center_x = self.x + self.size // 2
+        image = get_image(self.spritesheet, math.floor(self.frame), 32, 32, 2, 0)
+        if self.frame >= 4.75:
+            self.frame = 0
+        else:
+            self.frame += 0.1
+        screen.blit(image, (self.x-32, self.y-32))
+        """center_x = self.x + self.size // 2
         center_y = self.y + self.size // 2
+
         pygame.draw.circle(screen, (0,255,255), (center_x, center_y), self.size // 2)
 
 
@@ -60,7 +80,7 @@ class Player:
         # Draw the player
         center_x = self.x + self.size // 8
         center_y = self.y + self.size // 2
-        pygame.draw.circle(screen, (0, 255, 0), (center_x, center_y), self.size // 6)
+        pygame.draw.circle(screen, (0, 255, 0), (center_x, center_y), self.size // 6)"""
 
 
 
