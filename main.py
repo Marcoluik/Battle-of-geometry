@@ -186,9 +186,9 @@ while running:
         time_text = font.render(f"{gt_minutes} : {gt_seconds}", True, WHITE)
         screen.blit(time_text, (WIDTH // 2, 70))
 
-
-    circle_upgrade.draw(screen)
-    circle_upgrade.update(current_time, player.x, player.y)
+    if screen_manager.asteroid_bought:
+        circle_upgrade.draw(screen)
+        circle_upgrade.update(current_time, player.x, player.y)
 
 
     move_items_towards_player(coins + experience_points, player)
@@ -312,7 +312,7 @@ while running:
                         enemy_death_sfx.play()
                         break
 
-            if enemy in enemies and circle_upgrade.sprite_mask.overlap(enemy.sprite_mask,
+            if enemy in enemies and screen_manager.asteroid_bought and circle_upgrade.sprite_mask.overlap(enemy.sprite_mask,
                                                   (circle_upgrade.x - enemy.x - 32, circle_upgrade.y - enemy.y - 32)):
                 if enemy.take_damage(coins, experience_points, screen):
                     explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32,

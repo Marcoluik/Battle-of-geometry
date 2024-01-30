@@ -144,16 +144,17 @@ class screenz:
         health_price_text = self.upgrade_font.render(str(self.health_upgrade_price), True, (0, 0, 0))
 
         # Coins
-        coins_text = self.upgrade_font.render(str(self.total_coins), True, WHITE)
         coins_x = WIDTH-100
         coins_y = 24
 
 
         waiting = True
         while waiting:
+            screen.fill(BLACK)
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
             # Coins
+            coins_text = self.upgrade_font.render(str(self.total_coins), True, WHITE)
             screen.blit(coins_text, (coins_x, coins_y))
             screen.blit(coin_image, (coins_x-52, coins_y-14))
 
@@ -206,7 +207,7 @@ class screenz:
                     self.start_screen(screen)
                     waiting = False
                 if event.type == pygame.MOUSEBUTTONDOWN and (asteroid_button_x <= mouse_x <= asteroid_button_x + asteroid_button_width and
-                    asteroid_button_y <= mouse_y <= asteroid_button_y + asteroid_button_height) and self.total_coins > self.asteroid_upgrade_price:
+                    asteroid_button_y <= mouse_y <= asteroid_button_y + asteroid_button_height) and self.total_coins > self.asteroid_upgrade_price and not self.asteroid_bought:
                     self.asteroid_bought = 1
                     self.total_coins -= self.asteroid_upgrade_price
                     self.data[0] = f"{self.total_coins}\n"
