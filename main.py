@@ -25,6 +25,17 @@ next_lvl = 20
 # Define colors
 
 
+
+
+
+with open("upgrades.txt", "r") as fil:
+    data = fil.readlines()
+
+total_coins = int(data[0])
+asteroid_bought = int(data[1])
+lives_bought = int(data[2])
+
+
 # Game clock
 clock = pygame.time.Clock()
 
@@ -65,7 +76,6 @@ for _ in range(15):
 enemies = []
 projectiles = []
 player_coins = 0
-total_coins = 0
 coins = []
 player_experience = 0
 experience_points = []
@@ -85,8 +95,6 @@ screen_manager.start_screen(screen)
 last_reset = 0
 add_to_spawn_count = spawn_count
 while running:
-    print("Spawn:", add_to_spawn_count)
-    print("Interval", spawn_interval)
     screen.fill(BLACK)
     pygame.mouse.set_cursor(pygame.cursors.broken_x)
     current_time = pygame.time.get_ticks() - last_reset
@@ -236,6 +244,12 @@ while running:
                     damage_taken_sfx.play()
                 if player.health <= 0:
                     print("Player has died!")
+                    total_coins += player_coins
+                    data[0] = f"{total_coins}\n"
+                    with open("upgrades.txt", "w") as fil:
+                        fil.writelines(data)
+
+
                     game_over_sfx.play()
                     running = False
                     screen_manager.game_over_screen(screen, player_coins)  # Display game_over_screen
@@ -351,6 +365,9 @@ while running:
                 if player.health <= 0:
                     print("Player has died!")
                     total_coins += player_coins
+                    data[0] = f"{total_coins}\n"
+                    with open("upgrades.txt", "w") as fil:
+                        fil.writelines(data)
                     game_over_sfx.play()
                     running = False
                     last_reset = pygame.time.get_ticks()
@@ -396,6 +413,9 @@ while running:
             if player.health <= 0:
                 print("Player has died!")
                 total_coins += player_coins
+                data[0] = f"{total_coins}\n"
+                with open("upgrades.txt", "w") as fil:
+                    fil.writelines(data)
                 game_over_sfx.play()
                 running = False
                 last_reset = pygame.time.get_ticks()

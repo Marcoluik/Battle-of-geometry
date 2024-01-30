@@ -18,7 +18,23 @@ class screenz:
         self.health_upgrade_price = 500
         self.coins = 10000
 
+        with open("upgrades.txt", "r") as fil:
+            self.data = fil.readlines()
+
+        self.total_coins = int(self.data[0])
+        self.asteroid_bought = int(self.data[1])
+        self.lives_bought = int(self.data[2])
+
     def start_screen(self, screen):
+        with open("upgrades.txt", "r") as fil:
+            self.data = fil.readlines()
+
+        self.total_coins = int(self.data[0])
+        self.asteroid_bought = int(self.data[1])
+        self.lives_bought = int(self.data[2])
+
+        print(self.data)
+
         pygame.mouse.set_cursor(pygame.cursors.arrow)
         title_text = self.title_font.render('Inter-Galactic Star Warrior', True, WHITE)
         start_text = self.start_font.render('Press Any Key to Start', True, WHITE)
@@ -128,7 +144,7 @@ class screenz:
         health_price_text = self.upgrade_font.render(str(self.health_upgrade_price), True, (0, 0, 0))
 
         # Coins
-        coins_text = self.upgrade_font.render(str(self.coins), True, WHITE)
+        coins_text = self.upgrade_font.render(str(self.total_coins), True, WHITE)
         coins_x = WIDTH-100
         coins_y = 24
 
@@ -189,6 +205,15 @@ class screenz:
                     # (e.g., reset player position, health, coins, etc.)
                     self.start_screen(screen)
                     waiting = False
+                if event.type == pygame.MOUSEBUTTONDOWN and (asteroid_button_x <= mouse_x <= asteroid_button_x + asteroid_button_width and
+                    asteroid_button_y <= mouse_y <= asteroid_button_y + asteroid_button_height) and self.total_coins > self.asteroid_upgrade_price:
+                    self.asteroid_bought = 1
+                    self.total_coins -= self.asteroid_upgrade_price
+                    self.data[0] = f"{self.total_coins}\n"
+                    self.data[1] = f"{self.asteroid_bought}\n"
+                    with open("upgrades.txt", "w") as fil:
+                        fil.writelines(self.data)
+
 
             pygame.display.flip()
 
