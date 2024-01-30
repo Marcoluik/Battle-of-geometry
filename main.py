@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import events
 import screens
 import player_file
 import xp_coins
@@ -18,7 +19,7 @@ pygame.init()
 # Set up the display
 pygame.display.set_caption("Battle of geometry")
 enemy_spawn_time = 2  # Timer til enemies spawner i starten af spillet
-spawn_interval = 5000
+spawn_interval = 4000
 spawn_count = 2  # Initial number of enemies to spawn
 next_lvl = 20
 # Define colors
@@ -55,9 +56,16 @@ pygame.mixer.music.play(2, 00.00, 50)
 
 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
 circle_upgrade = player_file.CirclingUpgrade(WIDTH//2, HEIGHT//2)
+
+meteors = []
+for _ in range(15):
+    meteor_event = events.MeteorEvent(WIDTH - random.randint(10, 500), -random.randint(50, 600))
+    meteors.append(meteor_event)
+
 enemies = []
 projectiles = []
 player_coins = 0
+total_coins = 0
 coins = []
 player_experience = 0
 experience_points = []
@@ -72,10 +80,16 @@ screen_manager = screens.screenz()
 screen = screen_manager.screen
 screen_manager.start_screen(screen)
 
+
+
+last_reset = 0
+add_to_spawn_count = spawn_count
 while running:
+    print("Spawn:", add_to_spawn_count)
+    print("Interval", spawn_interval)
     screen.fill(BLACK)
     pygame.mouse.set_cursor(pygame.cursors.broken_x)
-    current_time = pygame.time.get_ticks()
+    current_time = pygame.time.get_ticks() - last_reset
     dt = clock.tick()
     game_time = current_time // 1000  # integer division
     gt_minutes = game_time // 60
@@ -91,6 +105,8 @@ while running:
             # Shoot a projectile
             pass
             """mx, my = pygame.mouse.get_pos()
+
+            mx, my = pygame.mouse.get_pos()
             dx, dy = mx - player.x, my - player.y
             distance = (dx ** 2 + dy ** 2) ** 0.5
             if distance != 0 and current_time - player.last_shot > player.shoot_cd:
@@ -111,8 +127,18 @@ while running:
             enemies.append(chosen_enemy_type())
 
         # Increase the spawn count following the power of 1.5 rule
-        if spawn_count < 8:
-            spawn_count = int(spawn_count ** 1.3)
+        if spawn_count < 5 and spawn_interval > 2500:
+            spawn_interval -= 10
+            add_to_spawn_count *= 1.05
+            spawn_count = math.floor(add_to_spawn_count)
+
+        if spawn_count >= 5  and spawn_count < 8 and spawn_interval > 2500:
+            spawn_interval -= 15
+            add_to_spawn_count *= 1.025
+            spawn_count = math.floor(add_to_spawn_count)
+
+        if spawn_count >= 8 and spawn_interval > 2500:
+            spawn_interval -= 25
 
     if not frozen:
         mx, my = pygame.mouse.get_pos()
@@ -255,7 +281,9 @@ while running:
         if not frozen:
             enemy.move_towards_player(player, enemies)
             for projectile in projectiles[:]:
-                if projectile.size != 4 and projectile.sprite_mask.overlap(enemy.sprite_mask, (projectile.x-enemy.x-32, projectile.y-enemy.y-32)):
+                if projectile.size != 4  and enemy in enemies and projectile.sprite_mask.overlap(enemy.sprite_mask, (projectile.x-enemy.x-32, projectile.y-enemy.y-32)):
+
+
                     projectiles.remove(projectile)
                     projectile_effects.append(projectile_file.ProjectileEffect(projectile.x, projectile.y))
                     if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
@@ -288,6 +316,65 @@ while running:
         if projectile_effect.frame > 10:
             projectile_effects.remove(projectile_effect)
 
+    #METEOR EVENT
+    if (current_time > 55000 and current_time < 60000) or (current_time > 115000 and current_time < 120000):
+        meteor_warning_text = font.render("WARNING: METEOR SHOWER INCOMING", True, WHITE)
+        screen.blit(meteor_warning_text, (WIDTH//2, HEIGHT//2 - 100))
+
+    if (current_time > 70000 and current_time < 71000) or (current_time > 130000 and current_time < 131000):
+        for meteor in meteors:
+            meteor.reset(WIDTH - random.randint(10, 500), -random.randint(50, 600))
+
+
+    if (current_time > 60000 and current_time < 70000) or (current_time > 120000 and current_time < 130000):
+        for meteor in meteors:
+            meteor.draw(screen)
+            meteor.update()
+
+            for enemy in enemies[:]:
+                if enemy in enemies and meteor in meteors and meteor.sprite_mask.overlap(enemy.sprite_mask, (meteor.x-enemy.x-32, meteor.y-enemy.y-32)):
+                    meteors.remove(meteor)
+                    if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
+                        explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32, enemy.y - 32, 3)
+                        explosions.append(explosion_effect)
+                        enemies.remove(enemy)
+                        enemy_death_sfx.play()
+                        break
+
+            if player.collides_with(meteor):
+                player.health -= 1
+                meteors.remove(meteor)
+
+                if player.health > 0:
+                    damage_taken_sfx.play()
+
+                if player.health <= 0:
+                    print("Player has died!")
+                    total_coins += player_coins
+                    game_over_sfx.play()
+                    running = False
+                    last_reset = pygame.time.get_ticks()
+                    screen_manager.game_over_screen(screen, player_coins)  # Display game_over_screen
+                    # Reset game state for a new game
+                    player = player_file.Player(WIDTH // 2, HEIGHT // 2)
+                    enemies = []
+                    projectiles = []
+                    player_coins = 0
+                    coins = []
+                    player_experience = 0
+                    experience_points = []
+                    next_lvl = 20
+                    enemy_spawn_time = pygame.time.get_ticks()
+                    spawn_interval = 4000
+                    spawn_count = 2
+                    add_to_spawn_count = spawn_count
+                    running = True
+
+
+
+
+
+
     for explosion_effect in explosions[:]:
         explosion_effect.update()
         explosion_effect.draw()
@@ -308,8 +395,10 @@ while running:
 
             if player.health <= 0:
                 print("Player has died!")
+                total_coins += player_coins
                 game_over_sfx.play()
                 running = False
+                last_reset = pygame.time.get_ticks()
                 screen_manager.game_over_screen(screen, player_coins)  # Display game_over_screen
                 # Reset game state for a new game
                 player = player_file.Player(WIDTH // 2, HEIGHT // 2)
@@ -319,8 +408,11 @@ while running:
                 coins = []
                 player_experience = 0
                 experience_points = []
+                next_lvl = 20
                 enemy_spawn_time = pygame.time.get_ticks()
+                spawn_interval = 4000
                 spawn_count = 2
+                add_to_spawn_count = spawn_count
                 running = True
     pygame.display.flip()
     clock.tick(FPS)

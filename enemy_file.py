@@ -73,6 +73,7 @@ class Enemy:
         self.speed = 2
         self.health = 2
         self.avoidance_radius = 20  # Radius for collision avoidance
+        self.enemy_removed = False
 
 
     def update(self):
@@ -126,6 +127,7 @@ class Enemy:
     def take_damage(self, coins, experience_points, screen):
         self.health -= player.attackdmg
         if self.health <= 0:
+            self.enemy_removed = False
             for _ in range(self.vertices):
                 coins.append(xp_coins.Coin(self.x, self.y))
                 experience_points.append(xp_coins.Experience(self.x, self.y))
