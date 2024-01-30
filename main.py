@@ -53,10 +53,6 @@ pygame.mixer.music.set_volume(0.06)
 pygame.mixer.music.play(2, 00.00, 50)
 
 
-
-player = player_file.Player(WIDTH // 2, HEIGHT // 2)
-circle_upgrade = player_file.CirclingUpgrade(WIDTH//2, HEIGHT//2)
-
 meteors = []
 for _ in range(15):
     meteor_event = events.MeteorEvent(WIDTH - random.randint(10, 500), -random.randint(50, 600))
@@ -79,6 +75,9 @@ frozen_timer = 0
 screen_manager = screens.screenz()
 screen = screen_manager.screen
 screen_manager.start_screen(screen)
+
+player = player_file.Player(WIDTH // 2, HEIGHT // 2)
+circle_upgrade = player_file.CirclingUpgrade(WIDTH//2, HEIGHT//2)
 
 
 
