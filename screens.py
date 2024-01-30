@@ -10,6 +10,8 @@ class screenz:
         self.start_font = pygame.font.Font("pixelletters.ttf", 36)
         self.guide_font = pygame.font.Font("pixelletters.ttf", 30)
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.background_image = pygame.image.load("images/background.jpg")
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
 
     def start_screen(self, screen):
         pygame.mouse.set_cursor(pygame.cursors.arrow)
@@ -24,7 +26,7 @@ class screenz:
         button_width = 50
         button_height = 50
 
-        screen.fill(BLACK)
+        screen.blit(self.background_image, (0, 0))
         screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, HEIGHT // 2 - 100))
         screen.blit(start_text, (WIDTH // 2 - start_text.get_width() // 2, HEIGHT // 2 + 50))
         screen.blit(guide_text, (WIDTH // 2 - guide_text.get_width() // 2, HEIGHT // 2 + 150))
@@ -88,7 +90,7 @@ class screenz:
                         self.start_screen(screen)
                         waiting_for_input = False
 
-            screen.fill(BLACK)
+            screen.blit(self.background_image, (0, 0))
             screen.blit(game_over_text, (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - 100))
             screen.blit(coins_text, (WIDTH // 2 - coins_text.get_width() // 2, HEIGHT // 2 - 30))
             pygame.draw.rect(screen, WHITE, (button_x, button_y, button_width, button_height))

@@ -19,7 +19,7 @@ pygame.init()
 # Set up the display
 pygame.display.set_caption("Battle of geometry")
 enemy_spawn_time = 2  # Timer til enemies spawner i starten af spillet
-spawn_interval = 5000
+spawn_interval = 4000
 spawn_count = 2  # Initial number of enemies to spawn
 next_lvl = 20
 # Define colors
@@ -65,6 +65,7 @@ for _ in range(15):
 enemies = []
 projectiles = []
 player_coins = 0
+total_coins = 0
 coins = []
 player_experience = 0
 experience_points = []
@@ -79,10 +80,13 @@ screen_manager = screens.screenz()
 screen = screen_manager.screen
 screen_manager.start_screen(screen)
 
+
+
 last_reset = 0
 add_to_spawn_count = spawn_count
 while running:
-
+    print("Spawn:", add_to_spawn_count)
+    print("Interval", spawn_interval)
     screen.fill(BLACK)
     pygame.mouse.set_cursor(pygame.cursors.broken_x)
     current_time = pygame.time.get_ticks() - last_reset
@@ -120,9 +124,18 @@ while running:
             enemies.append(chosen_enemy_type())
 
         # Increase the spawn count following the power of 1.5 rule
-        if spawn_count < 8:
+        if spawn_count < 5 and spawn_interval > 2500:
+            spawn_interval -= 10
             add_to_spawn_count *= 1.05
-            spawn_count = int(add_to_spawn_count)
+            spawn_count = math.floor(add_to_spawn_count)
+
+        if spawn_count >= 5  and spawn_count < 8 and spawn_interval > 2500:
+            spawn_interval -= 15
+            add_to_spawn_count *= 1.025
+            spawn_count = math.floor(add_to_spawn_count)
+
+        if spawn_count >= 8 and spawn_interval > 2500:
+            spawn_interval -= 25
 
 
 
@@ -236,7 +249,7 @@ while running:
         if not frozen:
             enemy.move_towards_player(player, enemies)
             for projectile in projectiles[:]:
-                if projectile.sprite_mask.overlap(enemy.sprite_mask, (projectile.x-enemy.x-32, projectile.y-enemy.y-32)):
+                if enemy in enemies and projectile.sprite_mask.overlap(enemy.sprite_mask, (projectile.x-enemy.x-32, projectile.y-enemy.y-32)):
                     projectiles.remove(projectile)
                     projectile_effects.append(projectile_file.ProjectileEffect(projectile.x, projectile.y))
                     if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
@@ -247,7 +260,7 @@ while running:
                         enemy_death_sfx.play()
                         break
 
-            if circle_upgrade.sprite_mask.overlap(enemy.sprite_mask,
+            if enemy in enemies and circle_upgrade.sprite_mask.overlap(enemy.sprite_mask,
                                                   (circle_upgrade.x - enemy.x - 32, circle_upgrade.y - enemy.y - 32)):
                 if enemy.take_damage(coins, experience_points, screen):
                     explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32,
@@ -280,7 +293,7 @@ while running:
             meteor.update()
 
             for enemy in enemies[:]:
-                if meteor.sprite_mask.overlap(enemy.sprite_mask, (meteor.x-enemy.x-32, meteor.y-enemy.y-32)):
+                if enemy in enemies and meteor in meteors and meteor.sprite_mask.overlap(enemy.sprite_mask, (meteor.x-enemy.x-32, meteor.y-enemy.y-32)):
                     meteors.remove(meteor)
                     if enemy.take_damage(coins, experience_points, screen):  # Pass coins list to take_damage
                         explosion_effect = enemy_file.ParticleAnimation('Images/explosion.png', 1, 8, screen, enemy.x - 32, enemy.y - 32, 3)
@@ -298,6 +311,7 @@ while running:
 
                 if player.health <= 0:
                     print("Player has died!")
+                    total_coins += player_coins
                     game_over_sfx.play()
                     running = False
                     last_reset = pygame.time.get_ticks()
@@ -312,7 +326,9 @@ while running:
                     experience_points = []
                     next_lvl = 20
                     enemy_spawn_time = pygame.time.get_ticks()
+                    spawn_interval = 4000
                     spawn_count = 2
+                    add_to_spawn_count = spawn_count
                     running = True
 
 
@@ -339,6 +355,7 @@ while running:
 
             if player.health <= 0:
                 print("Player has died!")
+                total_coins += player_coins
                 game_over_sfx.play()
                 running = False
                 last_reset = pygame.time.get_ticks()
@@ -353,7 +370,9 @@ while running:
                 experience_points = []
                 next_lvl = 20
                 enemy_spawn_time = pygame.time.get_ticks()
+                spawn_interval = 4000
                 spawn_count = 2
+                add_to_spawn_count = spawn_count
                 running = True
     pygame.display.flip()
     clock.tick(FPS)
