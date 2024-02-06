@@ -178,13 +178,16 @@ while running:
     tiles.update()
     if gt_minutes < 10 and gt_seconds < 10:
         time_text = font.render(f"0{gt_minutes} : 0{gt_seconds}", True, WHITE)
-        screen.blit(time_text, (WIDTH // 2, 70))
+        screen.blit(time_text, (WIDTH // 2-30, 70))
     elif gt_minutes < 10:
         time_text = font.render(f"0{gt_minutes} : {gt_seconds}", True, WHITE)
-        screen.blit(time_text, (WIDTH // 2, 70))
+        screen.blit(time_text, (WIDTH // 2-30, 70))
     else:
         time_text = font.render(f"{gt_minutes} : {gt_seconds}", True, WHITE)
-        screen.blit(time_text, (WIDTH // 2, 70))
+        screen.blit(time_text, (WIDTH // 2-30, 70))
+    if gt_minutes == 0 and gt_seconds < 10:
+        instructions_text = font.render("WASD to move. Space to dash. Survive, Destroy and Upgrade!", True, WHITE)
+        screen.blit(instructions_text, (50, HEIGHT-100))
 
     if screen_manager.asteroid_bought:
         circle_upgrade.draw(screen)
@@ -213,8 +216,8 @@ while running:
         # Display coin count
 
 
-    pygame.draw.rect(screen, "black", (0, 0, WIDTH, 30))
-    pygame.draw.rect(screen, "green", (0, 0, WIDTH * (player_experience/next_lvl), 30))
+    pygame.draw.rect(screen, "black", (0, 0, WIDTH, 40))
+    pygame.draw.rect(screen, "green", (0, 7, WIDTH * (player_experience/next_lvl), 25))
     hearthicon = pygame.image.load("Images/Hearth.png")
     hearthicon = pygame.transform.scale(hearthicon, (50, 50))
     for i in range(player.health):
