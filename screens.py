@@ -80,7 +80,7 @@ class screenz:
         while waiting:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if (upgrade_button_x <= mouse_x <= upgrade_button_x + upgrade_button_width and
-                            upgrade_button_y <= mouse_y <= upgrade_button_y + upgrade_button_height):
+                            upgrade_button_y <= mouse_y <= upgrade_button_y + upgrade_button_height): # upgrade_button mouse hover
                 self.upgrade_button_color = (205, 205, 205)
                 pygame.draw.rect(screen, self.upgrade_button_color,
                                  (upgrade_button_x, upgrade_button_y, upgrade_button_width, upgrade_button_height))
@@ -160,7 +160,7 @@ class screenz:
 
             # Return button
             if (return_button_x <= mouse_x <= return_button_x + return_button_width and
-                    return_button_y <= mouse_y <= return_button_y + return_button_height):
+                    return_button_y <= mouse_y <= return_button_y + return_button_height): # return button mouse hover
                 return_button_color = (205, 205, 205)
             else:
                 return_button_color = WHITE
@@ -170,7 +170,7 @@ class screenz:
 
             # Asteroid upgrade button
             if (asteroid_button_x <= mouse_x <= asteroid_button_x + asteroid_button_width and
-                    asteroid_button_y <= mouse_y <= asteroid_button_y + asteroid_button_height):
+                    asteroid_button_y <= mouse_y <= asteroid_button_y + asteroid_button_height): # mouse hover
                 asteroid_button_color = (205, 205, 205)
             else:
                 asteroid_button_color = (255, 255, 255)
@@ -182,7 +182,7 @@ class screenz:
 
             # Health upgrade button
             if (health_button_x <= mouse_x <= health_button_x + health_button_width and
-                    health_button_y <= mouse_y <= health_button_y + health_button_height):
+                    health_button_y <= mouse_y <= health_button_y + health_button_height): # mouse hover
                 health_button_color = (205, 205, 205)
             else:
                 health_button_color = (255, 255, 255)

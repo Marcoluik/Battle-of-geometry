@@ -109,7 +109,6 @@ while running:
             running = False
         #elif event.type == pygame.MOUSEBUTTONDOWN and not frozen:
         elif event.type and not frozen:
-            # Shoot a projectile
             pass
             """mx, my = pygame.mouse.get_pos()
 
@@ -133,7 +132,7 @@ while running:
             chosen_enemy_type = random.choice(enemy_types)
             enemies.append(chosen_enemy_type())
 
-        # Increase the spawn count following the power of 1.5 rule
+        # Increase the spawn count
         if spawn_count < 5 and spawn_interval > 2500:
             spawn_interval -= 10
             add_to_spawn_count *= 1.05
@@ -209,11 +208,7 @@ while running:
         exp.draw(screen)
         if player.collides_with(exp):
             experience_points.remove(exp)
-            # Handle experience gain here, for example:
             player_experience += 1
-
-    
-        # Display coin count
 
 
     pygame.draw.rect(screen, "black", (0, 0, WIDTH, 40))
@@ -290,7 +285,7 @@ while running:
             player.dash_cooldown -= 500
         elif upgrade == 6:
             player.shoot_cd -= 150
-        # Update and draw enemies
+
             
     for enemy in enemies[:]:
         # Check collision with projectiles
@@ -403,9 +398,7 @@ while running:
     for enemy in enemies:
         if player.collides_with(enemy):
             player.health -= 1  # Reduce player health
-            # Optionally, you can remove the enemy or move it away
-            # enemies.remove(enemy)  # Remove the enemy
-            # or reposition the enemy
+
             enemy.x = random.randint(0, WIDTH)
             enemy.y = random.randint(0, HEIGHT)
 

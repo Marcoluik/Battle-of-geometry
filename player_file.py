@@ -19,7 +19,7 @@ class Player:
         self.x = x
         self.y = y
         self.size = 25
-        self.color = (200, 200, 200)  # Assuming white color
+        self.color = (200, 200, 200)
         self.speed = 5
         self.health = 3
         self.dash_speed = 15  # Adjusted for multi-frame dash
